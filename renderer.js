@@ -1,47 +1,15 @@
-let ultimaResposta = "";
+function ouvir() {
+  const reconhecimento = new webkitSpeechRecognition();
 
-function falar(texto) {
-  const fala = new SpeechSynthesisUtterance(texto);
-  fala.lang = "pt-BR";
-  speechSynthesis.speak(fala);
-}
+  reconhecimento.lang = "pt-BR";
 
-async function enviar() {
-  const input = document.getElementById("input");
-  const chat = document.getElementById("chat");
+  reconhecimento.onresult = async function(event) {
+    const texto = event.results[0][0].transcript;
 
-  const texto = input.value;
+    document.getElementById("input").value = texto;
 
-  chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
+    enviar();
+  };
 
-  const resposta = await perguntarIA(texto);
-
-  chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
-
-  ultimaResposta = resposta;
-
-  falar(resposta);
-
-  gerarSugestoes();
-
-  input.value = "";
-}
-
-function gerarSugestoes() {
-  const s = document.getElementById("sugestoes");
-
-  s.innerHTML = `
-    <button onclick="usar('criar script roblox')">🎮 Script</button>
-    <button onclick="usar('criar cidade roblox')">🏙️ Cidade</button>
-    <button onclick="usar('fazer animação')">🎬 Animação</button>
-  `;
-}
-
-function usar(texto) {
-  document.getElementById("input").value = texto;
-}
-
-function executar() {
-  const cmd = prompt("Digite: bloco ou calculadora");
-  window.api.executar(cmd);
+  reconhecimento.start();
 }
