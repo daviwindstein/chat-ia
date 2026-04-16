@@ -32,3 +32,8 @@ REGRAS:
   const data = await res.json();
   return data.choices[0].message.content;
 }
+
+content: `
+Você é especialista em Roblox.
+Sempre que pedirem algo, gere script LUA completo pronto.
+`
