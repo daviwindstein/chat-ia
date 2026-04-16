@@ -1,5 +1,3 @@
-let memoria = [];
-
 async function enviar() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
@@ -8,30 +6,25 @@ async function enviar() {
 
   chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
 
-  memoria.push({ role: "user", content: texto });
-
-  const resposta = await perguntarIAComMemoria();
+  const resposta = await perguntarIA(texto);
 
   chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
 
-  memoria.push({ role: "assistant", content: resposta });
+  gerarSugestoes();
 
   input.value = "";
 }
 
-async function perguntarIAComMemoria() {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer SUA_API_KEY_AQUI",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: memoria
-    })
-  });
+function gerarSugestoes() {
+  const s = document.getElementById("sugestoes");
 
-  const data = await res.json();
-  return data.choices[0].message.content;
+  s.innerHTML = `
+    <button onclick="usar('criar script roblox')">🎮 Script Roblox</button>
+    <button onclick="usar('criar cidade roblox')">🏙️ Cidade</button>
+    <button onclick="usar('fazer animação')">🎬 Animação</button>
+  `;
+}
+
+function usar(texto) {
+  document.getElementById("input").value = texto;
 }
