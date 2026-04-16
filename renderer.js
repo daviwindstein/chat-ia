@@ -10,7 +10,6 @@ async function enviar() {
   addMsg(texto, "user");
   input.value = "";
 
-  // 👇 AQUI é o certo (NÃO usar perguntarIA)
   const resposta = await ipcRenderer.invoke("ia", texto);
 
   addMsg(resposta, "bot");
