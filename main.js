@@ -28,7 +28,27 @@ ipcMain.handle("ia", async (event, texto) => {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: texto }]
+        messages: [
+  {
+    role: "system",
+    content: `
+Você é uma IA extremamente inteligente, amigável e divertida.
+
+REGRAS:
+- NUNCA repita exatamente o que o usuário disse
+- Sempre responda de forma completa e útil
+- Explique de forma simples
+- Seja criativa e inteligente
+- Se pedirem script ou jogo, gere código completo
+- Fale como um humano, não como robô
+- Pode dar ideias, melhorar respostas e expandir
+`
+  },
+  {
+    role: "user",
+    content: texto
+  }
+]
       })
     });
 
