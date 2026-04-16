@@ -1,15 +1,8 @@
-function ouvir() {
-  const reconhecimento = new webkitSpeechRecognition();
+function criarArquivoIA() {
+  const nome = prompt("Nome do arquivo:");
+  const conteudo = ultimaResposta;
 
-  reconhecimento.lang = "pt-BR";
+  window.api.criarArquivo(nome, conteudo);
 
-  reconhecimento.onresult = async function(event) {
-    const texto = event.results[0][0].transcript;
-
-    document.getElementById("input").value = texto;
-
-    enviar();
-  };
-
-  reconhecimento.start();
+  alert("Arquivo criado 💻");
 }
