@@ -1,10 +1,14 @@
+const historico = [];
+
 ipcMain.handle("ia", async (event, texto) => {
   try {
+    // guarda usuário
+    historico.push({ role: "user", content: texto });
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer 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`,
+        "Authorization": `Bearer SUA_API_KEY`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -15,33 +19,38 @@ ipcMain.handle("ia", async (event, texto) => {
           {
             role: "system",
             content: `
-Você é uma IA inteligente e criativa.
+Você é uma IA avançada estilo ChatGPT.
 
-REGRAS IMPORTANTES:
-- NUNCA repita exatamente o que o usuário disse
-- Sempre responda diferente
-- Seja natural e amigável
-- Se o usuário disser "oi", responda algo como "Oi! 😄 tudo bem?"
-- Se pedirem script ou jogo, crie código completo
+REGRAS:
+- NUNCA repita a frase do usuário
+- Sempre responda com novas palavras
+- Seja útil, inteligente e amigável
+- Se pedirem script, gere COMPLETO
+- Explique de forma simples
 `
           },
-          {
-            role: "user",
-            content: texto
-          }
+          ...historico
         ]
       })
     });
 
     const data = await res.json();
 
-    console.log("RESPOSTA IA:", data);
+    console.log("IA DEBUG:", data);
 
-    if (!data.choices || !data.choices[0]) {
-      return "❌ erro na resposta da IA";
+    if (!data.choices) {
+      return "❌ erro na IA: " + JSON.stringify(data);
     }
 
-    return data.choices[0].message.content;
+    const resposta = data.choices[0].message.content;
+
+    // guarda resposta
+    historico.push({ role: "assistant", content: resposta });
+
+    // limita memória
+    if (historico.length > 20) historico.shift();
+
+    return resposta;
 
   } catch (e) {
     return "Erro: " + e.message;
