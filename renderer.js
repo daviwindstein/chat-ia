@@ -1,3 +1,15 @@
+let ultimaResposta = "";
+
+function falar(texto) {
+  const fala = new SpeechSynthesisUtterance(texto);
+
+  fala.lang = "pt-BR";
+  fala.rate = 1;
+  fala.pitch = 1;
+
+  speechSynthesis.speak(fala);
+}
+
 async function enviar() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
@@ -10,21 +22,9 @@ async function enviar() {
 
   chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
 
-  gerarSugestoes();
+  ultimaResposta = resposta;
+
+  falar(resposta); // 🔥 AQUI FAZ ELA FALAR
 
   input.value = "";
-}
-
-function gerarSugestoes() {
-  const s = document.getElementById("sugestoes");
-
-  s.innerHTML = `
-    <button onclick="usar('criar script roblox')">🎮 Script Roblox</button>
-    <button onclick="usar('criar cidade roblox')">🏙️ Cidade</button>
-    <button onclick="usar('fazer animação')">🎬 Animação</button>
-  `;
-}
-
-function usar(texto) {
-  document.getElementById("input").value = texto;
 }
