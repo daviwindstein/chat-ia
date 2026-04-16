@@ -1,21 +1,22 @@
-npm init -y
-npm install electron
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DevMind AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-const { exec } = require('child_process');
+<h1>🔥 DevMind AI</h1>
 
-exec("notepad"); // abre bloco de notas
+<textarea id="input" placeholder="Digite algo..."></textarea>
 
-localStorage.setItem("permissao", "sempre");
+<button onclick="enviar()">🤖 Perguntar</button>
+<button onclick="executarCodigo()">⚡ Executar no PC</button>
 
-const { app, BrowserWindow } = require('electron');
+<pre id="chat"></pre>
 
-function createWindow() {
-  const win = new BrowserWindow({
-    width: 1000,
-    height: 700
-  });
+<script src="ai.js"></script>
+<script src="renderer.js"></script>
 
-  win.loadFile('index.html'); // SEU SITE
-}
-
-app.whenReady().then(createWindow);
+</body>
+</html>
