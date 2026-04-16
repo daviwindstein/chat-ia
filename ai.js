@@ -1,39 +1,46 @@
-async function perguntarIA(prompt) {
+const API_KEY = "SUA_API_KEY_AQUI";
+
+let memoria = [
+  {
+    role: "system",
+    content: `
+Você é uma IA estilo ChatGPT.
+
+REGRAS:
+- Explique simples e direto
+- Seja simpática e um pouco engraçada 😄
+- Crie scripts completos (principalmente Roblox - Lua)
+- Ajude a criar jogos, cidades e sistemas
+- Sempre dê ideias extras
+
+FORMATO:
+1. Explicação
+2. Código
+3. Dica extra
+`
+  }
+];
+
+async function perguntarIA(texto) {
+  memoria.push({ role: "user", content: texto });
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer SUA_API_KEY_AQUI",
+      "Authorization": `Bearer ${API_KEY}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-Você é uma IA extremamente inteligente, estilo ChatGPT.
-
-REGRAS:
-- Explique simples e direto
-- Crie scripts completos
-- Seja engraçada 😄
-- Ajude com Roblox, jogos, animações
-- Sempre dê sugestões extras
-`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ]
+      messages: memoria
     })
   });
 
   const data = await res.json();
-  return data.choices[0].message.content;
-}
+  const resposta = data.choices[0].message.content;
 
-content: `
-Você é especialista em Roblox.
-Sempre que pedirem algo, gere script LUA completo pronto.
+  memoria.push({ role: "assistant", content: resposta });
+
+  return resposta;
+}
 `
