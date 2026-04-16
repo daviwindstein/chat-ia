@@ -12,3 +12,9 @@ contextBridge.exposeInMainWorld("pc", {
     fs.writeFileSync(nome, conteudo);
   }
 });
+
+const { exec } = require('child_process');
+
+contextBridge.exposeInMainWorld("pc", {
+  abrirBloco: () => exec("notepad")
+});
