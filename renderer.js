@@ -1,8 +1,14 @@
-function criarArquivoIA() {
-  const nome = prompt("Nome do arquivo:");
-  const conteudo = ultimaResposta;
+async function enviar() {
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
 
-  window.api.criarArquivo(nome, conteudo);
+  const texto = input.value;
 
-  alert("Arquivo criado 💻");
+  chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
+
+  const resposta = await perguntarIA(texto);
+
+  chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
+
+  input.value = "";
 }
