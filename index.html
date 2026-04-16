@@ -2,20 +2,48 @@
 <html>
 <head>
   <title>DevMind AI</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    #chat {
+      width: 80%;
+      height: 300px;
+      background: #1a1a1a;
+      margin: auto;
+      padding: 10px;
+      overflow-y: auto;
+      border-radius: 10px;
+    }
+
+    input {
+      width: 60%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 5px;
+      background: #00ffcc;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<h1>🔥 DevMind AI</h1>
+<h1>🤖 DevMind AI</h1>
 
-<textarea id="input" placeholder="Digite algo..."></textarea>
+<div id="chat"></div>
 
-<button onclick="enviar()">🤖 Perguntar</button>
-<button onclick="executarCodigo()">⚡ Executar no PC</button>
+<input id="input" placeholder="Digite algo...">
+<button onclick="enviar()">Enviar</button>
 
-<pre id="chat"></pre>
-
-<script src="ai.js"></script>
 <script src="renderer.js"></script>
 
 </body>
