@@ -1,14 +1,8 @@
-"scripts": {
-  "start": "electron .",
-  "build": "electron-builder"
-}
-
-function falar(texto) {
-  const fala = new SpeechSynthesisUtterance(texto);
-
-  fala.lang = "pt-BR"; // português
-  fala.rate = 1; // velocidade
-  fala.pitch = 1; // tom
-
-  speechSynthesis.speak(fala);
+{
+  "name": "devmind-ai",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  }
 }
