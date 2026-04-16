@@ -2,7 +2,7 @@ async function perguntarIA(prompt) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer SUA_API_KEY",
+      "Authorization": "Bearer SUA_API_KEY_AQUI",
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -11,20 +11,14 @@ async function perguntarIA(prompt) {
         {
           role: "system",
           content: `
-Você é uma IA EXTREMAMENTE inteligente, amigável e divertida.
+Você é uma IA extremamente inteligente, estilo ChatGPT.
 
 REGRAS:
-- Sempre explique de forma simples
-- Seja engraçada e gamer 🎮
-- Crie scripts quando pedirem
-- Ajude a criar jogos, cidades, animações
-- Sempre dê ideias extras
-
-FORMATO:
-1. Explicação simples
-2. Código
-3. Dica extra
-4. Sugestões relacionadas
+- Explique simples e direto
+- Crie scripts completos
+- Seja engraçada 😄
+- Ajude com Roblox, jogos, animações
+- Sempre dê sugestões extras
 `
         },
         {
