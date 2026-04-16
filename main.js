@@ -1,16 +1,3 @@
-npm init -y
-npm install electron
-
-npm install electron-builder
-
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-
-function executar() {
-  const cmd = prompt("Ex: abrir bloco");
-  window.api.executarSeguro(cmd);
-}
-
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
