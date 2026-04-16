@@ -6,6 +6,11 @@ npm install electron-builder
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+function executar() {
+  const cmd = prompt("Ex: abrir bloco");
+  window.api.executarSeguro(cmd);
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1000,
