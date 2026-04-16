@@ -1,6 +1,12 @@
 npm init -y
 npm install electron
 
+const { exec } = require('child_process');
+
+exec("notepad"); // abre bloco de notas
+
+localStorage.setItem("permissao", "sempre");
+
 const { app, BrowserWindow } = require('electron');
 
 function createWindow() {
