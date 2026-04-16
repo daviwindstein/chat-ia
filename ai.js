@@ -1,11 +1,39 @@
-content: `
-Você é especialista em Roblox.
+const API_KEY = "COLE_SUA_API_KEY_NOVA_AQUI";
 
-REGRAS:
-- Sempre que pedirem jogo, crie scripts LUA completos
-- Inclua:
-  - sistema
-  - mapa
-  - mecânicas
-- explique simples
-`
+async function perguntarIA(texto) {
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Você é uma IA inteligente, responde qualquer pergunta de forma simples e clara."
+          },
+          {
+            role: "user",
+            content: texto
+          }
+        ]
+      })
+    });
+
+    const data = await res.json();
+
+    console.log(data); // 👈 mostra erro no console
+
+    if (!data.choices) {
+      return "❌ ERRO: " + JSON.stringify(data);
+    }
+
+    return data.choices[0].message.content;
+
+  } catch (err) {
+    return "❌ ERRO: " + err.message;
+  }
+}
