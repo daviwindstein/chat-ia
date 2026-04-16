@@ -74,3 +74,14 @@ button {
   padding: 10px;
   gap: 10px;
 }
+
+#btnEnviar {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+button {
+  cursor: pointer;
+  pointer-events: auto;
+}
