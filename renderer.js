@@ -58,6 +58,18 @@ async function gerarScript() {
 
   addMsg(resposta, "ai");
 
+  async function gerarImagem() {
+  const prompt = document.getElementById("input").value;
+
+  const url = await window.api.imagem(prompt);
+
+  const img = document.createElement("img");
+  img.src = url;
+  img.style.width = "200px";
+
+  document.getElementById("chat").appendChild(img);
+}
+
   // salva no PC
   window.pc.salvar("script.lua", resposta);
 
