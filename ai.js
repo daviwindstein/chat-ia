@@ -1,4 +1,4 @@
-const API_KEY = "COLE_SUA_API_KEY_NOVA_AQUI";
+const API_KEY = "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";
 
 async function perguntarIA(texto) {
   try {
