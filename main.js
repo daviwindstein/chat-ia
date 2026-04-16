@@ -1,29 +1,58 @@
-const { ipcRenderer } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
+const fetch = require("node-fetch");
 
-const input = document.getElementById("msg");
-const chat = document.getElementById("chat");
+let memoria = [];
 
-async function enviar() {
-  const texto = input.value;
-  if (!texto) return;
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
 
-  addMsg(texto, "user");
-  input.value = "";
-
-  const resposta = await ipcRenderer.invoke("ia", texto);
-
-  addMsg(resposta, "bot");
+  win.loadFile("index.html");
 }
 
-function addMsg(texto, tipo) {
-  const div = document.createElement("div");
-  div.className = tipo;
-  div.innerText = texto;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
+app.whenReady().then(createWindow);
 
-// ENTER também envia
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") enviar();
+ipcMain.handle("ia", async (event, texto) => {
+  try {
+
+    memoria.push({ role: "user", content: texto });
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer SUA_API_KEY"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.9,
+        messages: [
+          {
+            role: "system",
+            content: "Você é uma IA inteligente, útil e nunca repete o usuário."
+          },
+          ...memoria
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    let resposta = data?.choices?.[0]?.message?.content || "Erro na IA";
+
+    memoria.push({ role: "assistant", content: resposta });
+
+    if (memoria.length > 20) memoria.shift();
+
+    return resposta;
+
+  } catch (err) {
+    return "Erro: " + err.message;
+  }
 });
