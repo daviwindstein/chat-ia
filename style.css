@@ -85,3 +85,6 @@ button {
   cursor: pointer;
   pointer-events: auto;
 }
+* {
+  pointer-events: auto !important;
+}
