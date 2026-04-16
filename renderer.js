@@ -45,3 +45,21 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
+const resposta = await window.api.perguntarIA(texto);
+addMsg(resposta, "ai"); // NÃO usar "texto" aqui
+
+async function gerarScript() {
+  const prompt = document.getElementById("input").value;
+
+  const resposta = await window.api.perguntarIA(
+    "Crie um script Roblox completo em Lua: " + prompt
+  );
+
+  addMsg(resposta, "ai");
+
+  // salva no PC
+  window.pc.salvar("script.lua", resposta);
+
+  addMsg("💾 Script salvo como script.lua", "ai");
+}
