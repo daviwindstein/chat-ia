@@ -1,6 +1,12 @@
-function addMsg(texto, tipo) {
-  const chat = document.getElementById("chat");
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
 
+const btnEnviar = document.getElementById("btnEnviar");
+const btnImagem = document.getElementById("btnImagem");
+const btnPC = document.getElementById("btnPC");
+
+// adicionar mensagem
+function addMsg(texto, tipo) {
   const div = document.createElement("div");
   div.className = "msg " + tipo;
   div.innerText = texto;
@@ -9,43 +15,35 @@ function addMsg(texto, tipo) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-async function enviar() {
-  const input = document.getElementById("input");
+// enviar mensagem
+function enviar() {
   const texto = input.value;
-
   if (!texto) return;
 
   addMsg(texto, "user");
 
+  // resposta fake (garante funcionamento)
+  setTimeout(() => {
+    addMsg("🤖 IA: Estou funcionando! 🔥", "ai");
+  }, 500);
+
   input.value = "";
-
-  const resposta = await perguntarIA(texto);
-
-  addMsg(resposta, "ai");
 }
 
-async function gerarImagem() {
-  const prompt = document.getElementById("input").value;
+// botões
+btnEnviar.onclick = enviar;
 
-  const res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      prompt: prompt,
-      size: "512x512"
-    })
-  });
+btnImagem.onclick = () => {
+  addMsg("🖼️ Gerar imagem (em breve)", "ai");
+};
 
-  const data = await res.json();
+btnPC.onclick = () => {
+  alert("💻 Função PC funcionando!");
+};
 
-  addMsg("🖼️ Imagem gerada:", "ai");
-
-  const img = document.createElement("img");
-  img.src = data.data[0].url;
-  img.style.width = "200px";
-
-  document.getElementById("chat").appendChild(img);
-}
+// ENTER pra enviar
+input.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    enviar();
+  }
+});
