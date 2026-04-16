@@ -1,6 +1,8 @@
 npm init -y
 npm install electron
 
+npm install electron-builder
+
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
