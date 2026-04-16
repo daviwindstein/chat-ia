@@ -2,11 +2,6 @@ body {
   background: #0f0f0f;
   color: white;
   font-family: Arial;
-}
-
-.container {
-  width: 80%;
-  margin: auto;
   text-align: center;
 }
 
@@ -16,6 +11,7 @@ body {
   background: #1a1a1a;
   padding: 10px;
   border-radius: 10px;
+  margin: 10px;
 }
 
 input {
@@ -25,7 +21,7 @@ input {
 
 button {
   padding: 10px;
+  margin: 5px;
   background: #00ffcc;
   border: none;
-  margin-left: 5px;
 }
