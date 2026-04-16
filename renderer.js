@@ -26,6 +26,7 @@ function enviar() {
   setTimeout(() => {
     addMsg("🤖 IA: Estou funcionando! 🔥", "ai");
   }, 500);
+  const resposta = await window.api.perguntarIA(texto);
 
   input.value = "";
 }
