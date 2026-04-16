@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require('electron');
+npm install node-fetch
+  const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
 function createWindow() {
