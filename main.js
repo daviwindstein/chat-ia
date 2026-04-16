@@ -17,3 +17,8 @@ function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+
+function executar() {
+  const comando = prompt("Digite comando (ex: notepad):");
+  window.api.executar(comando);
+}
