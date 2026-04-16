@@ -70,8 +70,16 @@ async function gerarScript() {
   document.getElementById("chat").appendChild(img);
 }
 
-  // salva no PC
+async function gerarScript() {
+  const prompt = document.getElementById("input").value;
+
+  const resposta = await window.api.perguntarIA(
+    "Crie um script Roblox completo: " + prompt
+  );
+
+  addMsg(resposta, "ai");
+
   window.pc.salvar("script.lua", resposta);
 
-  addMsg("💾 Script salvo como script.lua", "ai");
+  addMsg("💾 Script salvo no PC!", "ai");
 }
