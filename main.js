@@ -1,9 +1,6 @@
 ipcMain.handle("ia", async (event, texto) => {
   try {
 
-    // guarda mensagem do usuário
-    historico.push({ role: "user", content: texto });
-
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -12,37 +9,39 @@ ipcMain.handle("ia", async (event, texto) => {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.9,
+        temperature: 1,
         max_tokens: 800,
         messages: [
           {
             role: "system",
             content: `
-Você é uma IA avançada estilo ChatGPT.
+Você é uma IA inteligente e criativa.
 
-REGRAS:
-- Nunca repita o usuário
-- Responda de forma inteligente e natural
-- Seja amigável e clara
-- Ajude com scripts, jogos e dúvidas
-- Explique fácil
+REGRAS IMPORTANTES:
+- NUNCA repita exatamente o que o usuário disse
+- Sempre responda diferente
+- Seja natural e amigável
+- Se o usuário disser "oi", responda algo como "Oi! 😄 tudo bem?"
+- Se pedirem script ou jogo, crie código completo
 `
           },
-
-          // 🔥 memória entra aqui
-          ...historico
+          {
+            role: "user",
+            content: texto
+          }
         ]
       })
     });
 
     const data = await res.json();
 
-    const resposta = data.choices[0].message.content;
+    console.log("RESPOSTA IA:", data);
 
-    // guarda resposta da IA também
-    historico.push({ role: "assistant", content: resposta });
+    if (!data.choices || !data.choices[0]) {
+      return "❌ erro na resposta da IA";
+    }
 
-    return resposta;
+    return data.choices[0].message.content;
 
   } catch (e) {
     return "Erro: " + e.message;
