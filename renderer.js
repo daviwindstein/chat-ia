@@ -1,32 +1,24 @@
-function responder(msg) {
-  msg = msg.toLowerCase();
+function gerarSugestoes(texto) {
+  const sugestoes = document.getElementById("sugestoes");
 
-  if (msg.includes("oi")) {
-    return "Oi 😄 tudo bem? Eu sou sua IA gamer 🎮🔥";
-  }
-
-  if (msg.includes("tudo bem")) {
-    return "Tudo ótimo! Melhor agora falando contigo 😎";
-  }
-
-  if (msg.includes("script")) {
-    return "Bora criar script 😈💻 me fala o que você quer!";
-  }
-
-  return "😅 Não entendi muito bem, mas tenta de novo aí!";
+  sugestoes.innerHTML = `
+    <button onclick="usarSugestao('criar script')">💻 Criar Script</button>
+    <button onclick="usarSugestao('criar cidade')">🏙️ Criar Cidade</button>
+    <button onclick="usarSugestao('fazer animação')">🎬 Animação</button>
+  `;
 }
 
-function enviar() {
-  const input = document.getElementById("input");
-  const chat = document.getElementById("chat");
+function usarSugestao(texto) {
+  document.getElementById("input").value = texto;
+}
 
-  const texto = input.value;
+const comandosPermitidos = ["notepad", "calc"];
 
-  chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
+function executarSeguro(cmd) {
+  if (!comandosPermitidos.includes(cmd)) {
+    alert("Comando não permitido ⚠️");
+    return;
+  }
 
-  const resposta = responder(texto);
-
-  chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
-
-  input.value = "";
+  window.api.executar(cmd);
 }
