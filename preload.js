@@ -1,17 +1,17 @@
 const { contextBridge } = require('electron');
 const { exec } = require('child_process');
 
-const comandosPermitidos = {
-  "abrir bloco": "notepad",
-  "abrir calculadora": "calc"
+const comandos = {
+  "bloco": "notepad",
+  "calculadora": "calc"
 };
 
 contextBridge.exposeInMainWorld("api", {
-  executarSeguro: (nome) => {
-    if (comandosPermitidos[nome]) {
-      exec(comandosPermitidos[nome]);
+  executar: (nome) => {
+    if (comandos[nome]) {
+      exec(comandos[nome]);
     } else {
-      alert("Comando bloqueado ⚠️");
+      alert("Comando não permitido ⚠️");
     }
   }
 });
