@@ -18,7 +18,7 @@ async function enviar() {
 
   chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
 
-  const resposta = await perguntarIA(texto);
+  const resposta = "Oi 😄 estou funcionando!";
 
   chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
 
