@@ -1,8 +1,5 @@
-const { contextBridge } = require('electron');
-const { exec } = require('child_process');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld("api", {
-  executar: (cmd) => {
-    if (cmd === "bloco") exec("notepad");
-  }
+  perguntarIA: (texto) => ipcRenderer.invoke("perguntarIA", texto)
 });
