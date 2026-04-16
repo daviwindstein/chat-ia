@@ -1,38 +1,32 @@
-let permissao = localStorage.getItem("permissao") || "perguntar";
+function responder(msg) {
+  msg = msg.toLowerCase();
 
-function definirPermissao() {
-  const escolha = prompt(
-    "Permitir controle do PC?\n1 = sempre\n2 = perguntar\n3 = nunca"
-  );
-
-  if (escolha == "1") permissao = "sempre";
-  if (escolha == "2") permissao = "perguntar";
-  if (escolha == "3") permissao = "nunca";
-
-  localStorage.setItem("permissao", permissao);
-}
-
-async function enviar() {
-  const input = document.getElementById("input").value;
-
-  const resposta = await perguntarIA(input);
-
-  document.getElementById("chat").innerText = resposta;
-}
-
-function executarCodigo() {
-  if (!permissao) definirPermissao();
-
-  if (permissao === "nunca") {
-    alert("Acesso bloqueado");
-    return;
+  if (msg.includes("oi")) {
+    return "Oi 😄 tudo bem? Eu sou sua IA gamer favorita 🎮🔥";
   }
 
-  if (permissao === "perguntar") {
-    if (!confirm("Executar no PC?")) return;
+  if (msg.includes("tudo bem")) {
+    return "Tudo ótimo! Melhor agora falando contigo 😎";
   }
 
-  const codigo = document.getElementById("chat").innerText;
+  if (msg.includes("script")) {
+    return "Bora criar script 😈💻 me fala o que você quer!";
+  }
 
-  window.api.executar(codigo);
+  return "Hmm 🤔 não entendi muito bem, mas tô aqui pra ajudar! 😄";
+}
+
+function enviar() {
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
+
+  const texto = input.value;
+
+  chat.innerHTML += `<p><b>Você:</b> ${texto}</p>`;
+
+  const resposta = responder(texto);
+
+  chat.innerHTML += `<p><b>IA:</b> ${resposta}</p>`;
+
+  input.value = "";
 }
