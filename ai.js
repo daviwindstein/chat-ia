@@ -1,39 +1,47 @@
-const API_KEY = "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";
+const API_KEY = "COLE_SUA_API_KEY_AQUI";
 
 async function perguntarIA(texto) {
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Você é uma IA inteligente, responde qualquer pergunta de forma simples e clara."
-          },
-          {
-            role: "user",
-            content: texto
-          }
-        ]
-      })
-    });
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Você é uma IA inteligente, responde tudo de forma simples e cria scripts quando pedirem."
+        },
+        {
+          role: "user",
+          content: texto
+        }
+      ]
+    })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    console.log(data); // 👈 mostra erro no console
+  return data.choices[0].message.content;
+}
 
-    if (!data.choices) {
-      return "❌ ERRO: " + JSON.stringify(data);
-    }
+// 🖼️ IMAGEM
+async function gerarImagemIA(prompt) {
+  const res = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prompt: prompt,
+      size: "512x512"
+    })
+  });
 
-    return data.choices[0].message.content;
+  const data = await res.json();
 
-  } catch (err) {
-    return "❌ ERRO: " + err.message;
-  }
+  return data.data[0].url;
 }
