@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const fetch = require("node-fetch");
+const fs = require("fs");
 
 let memoria = [];
 
@@ -18,41 +19,32 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
+// 🔥 IA AQUI
 ipcMain.handle("ia", async (event, texto) => {
-  try {
 
-    memoria.push({ role: "user", content: texto });
+  memoria.push({ role: "user", content: texto });
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer SUA_API_KEY"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.9,
-        messages: [
-          {
-            role: "system",
-            content: "Você é uma IA inteligente, útil e nunca repete o usuário."
-          },
-          ...memoria
-        ]
-      })
-    });
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer SUA_API_KEY"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Você é uma IA útil e inteligente." },
+        ...memoria
+      ]
+    })
+  });
 
-    const data = await response.json();
+  const data = await res.json();
+  const resposta = data?.choices?.[0]?.message?.content || "Erro IA";
 
-    let resposta = data?.choices?.[0]?.message?.content || "Erro na IA";
+  memoria.push({ role: "assistant", content: resposta });
 
-    memoria.push({ role: "assistant", content: resposta });
+  if (memoria.length > 20) memoria.shift();
 
-    if (memoria.length > 20) memoria.shift();
-
-    return resposta;
-
-  } catch (err) {
-    return "Erro: " + err.message;
-  }
+  return resposta;
 });
