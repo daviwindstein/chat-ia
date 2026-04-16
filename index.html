@@ -1,30 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <div class="header">🤖 DevMind AI 🔥</div>
+  <title>DevMind AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app">
 
-  <div class="header">🤖 DevMind AI</div>
+  <div class="header">🤖 DevMind AI 🔥</div>
 
   <div id="chat" class="chat"></div>
 
   <div class="input-area">
     <input id="input" placeholder="Digite algo...">
-    <button onclick="enviar()">➤</button>
+    <button id="btnEnviar">➤</button>
   </div>
 
   <div class="actions">
-    <button onclick="gerarImagem()">🖼️ Imagem</button>
-    <button onclick="executar()">💻 PC</button>
+    <button id="btnImagem">🖼️ Imagem</button>
+    <button id="btnPC">💻 PC</button>
   </div>
 
 </div>
 
-<script src="ai.js"></script>
 <script src="renderer.js"></script>
 
 </body>
