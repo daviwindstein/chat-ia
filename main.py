@@ -3,7 +3,7 @@ import automacao
 import ferramentas
 
 # Substitua pela sua chave do Google AI Studio
-MINHA_CHAVE = "SUA_API_KEY_AQUI"
+MINHA_CHAVE = "AQ.Ab8RN6ItXlslhI9nmaonzaJf0skZUb9Q4332SWi1A4RgL7uAjA"
 
 genai.configure(api_key=MINHA_CHAVE)
 model = genai.GenerativeModel('gemini-pro')
