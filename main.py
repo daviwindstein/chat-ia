@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. ESTILO VISUAL (Texto Preto no Branco - Máxima Leitura)
+# 1. ESTILO VISUAL (Texto Preto no Branco - Super fácil de ler)
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
@@ -31,18 +31,17 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. CONFIGURAÇÃO DA CHAVE
-# Dica: Se colar a chave e der 401 de novo, crie uma NOVA chave no Google AI Studio.
 CHAVE = "AQ.Ab8RN6IJSugvxNfKfieQBxDVM7TtuHNZW6s5TKb4dzepBLLIdw" 
 
 if CHAVE == "SUA_API_KEY_AQUI":
     st.error("🚨 Falta a chave na linha 36!")
     st.stop()
 
-# 3. LIGAÇÃO COM A IA
+# 3. LIGAÇÃO COM A IA (Ajustado para evitar o 404)
 try:
-    # Usamos o método mais simples de todos para não dar erro de autenticação
-    genai.configure(api_key=CHAVE, transport='rest')
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    genai.configure(api_key=CHAVE)
+    # Usando 'gemini-pro' que é o modelo mais estável para evitar o erro 404
+    model = genai.GenerativeModel('gemini-pro')
 except Exception as e:
     st.error(f"Erro ao ligar a IA: {e}")
 
@@ -50,7 +49,7 @@ except Exception as e:
 if "mensagens" not in st.session_state:
     st.session_state["mensagens"] = []
 
-# 5. LATERAL
+# 5. BARRA LATERAL
 with st.sidebar:
     st.title("🤖 Chat.IA Tools")
     if st.button("➕ LIMPAR CHAT"):
@@ -60,7 +59,7 @@ with st.sidebar:
     st.write("✅ Scripts Roblox")
     st.write("✅ Automação de PC")
 
-# 6. CHAT
+# 6. INTERFACE
 st.title("⚡ Central Suprema Chat.IA 2.0")
 
 for msg in st.session_state["mensagens"]:
@@ -75,16 +74,12 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🚀 Pensando..."):
+        with st.spinner("🚀 A IA está pensando..."):
             try:
-                # Treinamento "Gente Boa"
-                treino = "Você é a Chat.IA 2.0, mestre em Roblox e muito amigável."
-                
-                # Chamada limpa e sem segredos complicados
-                response = model.generate_content(f"{treino} Pergunta: {prompt}")
-                
+                # Resposta direta para ser mais rápido
+                response = model.generate_content(prompt)
                 st.write(response.text)
                 st.session_state["mensagens"].append({"role": "assistant", "content": response.text})
             except Exception as e:
                 st.error(f"Erro na resposta: {e}")
-                st.info("Se o erro for 401, sua chave de API pode estar inválida. Tente criar uma nova!")
+                st.info("DICA FINAL: Se o erro persistir, gere uma NOVA chave no Google AI Studio. Chaves antigas dão erro 404.")
