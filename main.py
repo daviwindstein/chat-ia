@@ -1,14 +1,14 @@
 import streamlit as st
 from google import genai
 
-# 1. DESIGN SUPREMO (Fácil de ler e Estilo Gamer)
+# 1. ESTILO SUPREMO (Fundo escuro, mas mensagens brancas para leitura fácil)
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; }
     
-    /* MENSAGENS BRANCAS COM TEXTO PRETO (MUITO LEGÍVEL) */
+    /* MENSAGENS BRANCAS COM TEXTO PRETO - MÁXIMA VISIBILIDADE */
     .stChatMessage {
         background-color: #ffffff !important;
         border-radius: 15px;
@@ -37,45 +37,46 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÃO DA IA (Nova Biblioteca)
-CHAVE = "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw" 
+# 2. CONFIGURAÇÃO DA CHAVE
+CHAVE = "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw" # COLOQUE SUA CHAVE AQUI DENTRO
 
-if CHAVE == "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw":
-    st.error("🚨 Cole sua API KEY dentro das aspas no código!")
+if CHAVE == "SUA_API_KEY_AQUI":
+    st.error("🚨 Você esqueceu de colar sua API KEY no código!")
     st.stop()
 
-# Inicializa o cliente novo do Google
+# Inicializa o cliente moderno do Google
 try:
     client = genai.Client(api_key=CHAVE)
 except Exception as e:
     st.error(f"Erro na conexão: {e}")
 
-# 3. MEMÓRIA E FERRAMENTAS
+# 3. MEMÓRIA DO CHAT
 if "mensagens" not in st.session_state:
     st.session_state.mensagens = []
 
+# 4. BARRA LATERAL COM FERRAMENTAS
 with st.sidebar:
-    st.title("🤖 Chat.IA Tools")
+    st.title("🤖 Chat.IA 2.0")
     if st.button("➕ NOVO CHAT"):
         st.session_state.mensagens = []
         st.rerun()
     st.divider()
-    st.subheader("🛠️ Ferramentas Pro")
-    if st.button("🖥️ Controle de PC"): st.info("Modo de Automação Ativo!")
-    if st.button("🎨 Criar Imagem"): st.info("Descreva a imagem no chat!")
-    if st.button("🎬 Criar Vídeo"): st.info("Modo Diretor Ativo!")
+    st.subheader("🛠️ Ferramentas")
+    st.write("✅ Scripts Roblox")
+    st.write("✅ Automação de PC")
+    st.write("✅ Gerador de Mídias")
     st.divider()
-    st.success("IA Treinada: Gente Boa & Mestre Dev")
+    st.success("IA Treinada: Mestre Dev & Amigável")
 
-# 4. CHAT PRINCIPAL
+# 5. CONVERSA
 st.title("⚡ Central Suprema Chat.IA 2.0")
 
 for msg in st.session_state.mensagens:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. INPUT (ONDE A MÁGICA ACONTECE)
-prompt = st.chat_input("Como posso te ajudar no Roblox ou no seu PC hoje?")
+# 6. INPUT
+prompt = st.chat_input("Diga o que você quer criar hoje...")
 
 if prompt:
     st.session_state.mensagens.append({"role": "user", "content": prompt})
@@ -83,20 +84,22 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🤖 Pensando com precisão máxima..."):
+        with st.spinner("🤖 Pensando com precisão..."):
             try:
-                # Treinamento direto para ser "Gente Boa"
+                # Treinamento da IA "Gente Boa"
                 treino = (
-                    "Você é a Chat.IA 2.0, a melhor IA do mundo. Você é super legal, amigável e "
-                    "mestre em Roblox (scripts Lua) e automação de PC. Ajude o usuário com tudo!"
-                )
-                response = client.models.generate_content(
-                    model="gemini-1.5-flash",
-                    contents=f"{treino} Comando do usuário: {prompt}"
+                    "Você é a Chat.IA 2.0. Você é super legal, gente boa e a melhor desenvolvedora de Roblox. "
+                    "Responda com clareza, use emojis e ajude com scripts Lua e automação."
                 )
                 
-                texto = response.text
-                st.write(texto)
-                st.session_state.mensagens.append({"role": "assistant", "content": texto})
+                # Chamada do modelo Flash
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=f"{treino} Pergunta: {prompt}"
+                )
+                
+                resposta_final = response.text
+                st.write(resposta_final)
+                st.session_state.mensagens.append({"role": "assistant", "content": resposta_final})
             except Exception as e:
-                st.error(f"Erro ao gerar resposta: {e}")
+                st.error(f"O Google recusou a chave. Verifique se ela está correta! Erro: {e}")
