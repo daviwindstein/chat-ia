@@ -37,7 +37,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. CONFIGURAÇÃO DA CHAVE
-API_KEY = "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw" 
+API_KEY = "AQ.Ab8RN6KOYeDZ7B5fwy2wngESCdjCS7aXebswkxleY_A2Z4BvJA" 
 
 if API_KEY == "COLE_SUA_CHAVE_AQUI":
     st.error("🚨 Você esqueceu de colar sua API KEY na linha 42!")
