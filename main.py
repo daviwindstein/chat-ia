@@ -33,44 +33,36 @@ st.markdown("""
         border: none;
         transition: 0.3s;
     }
-    .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0px 0px 15px #00d2ff;
-    }
     </style>
     """, unsafe_allow_html=True)
 
 # 3. SEGURANÇA DA CHAVE
-# SUBSTITUA ABAIXO PELA SUA CHAVE REAL
-API_KEY = "SUA_CHAVE_AQUI" 
+# COLOQUE SUA CHAVE DENTRO DAS ASPAS ABAIXO
+API_KEY = "AQ.Ab8RN6ItXlslhI9nmaonzaJf0skZUb9Q4332SWi1A4RgL7uAjA" 
 
-if API_KEY == "AQ.Ab8RN6ItXlslhI9nmaonzaJf0skZUb9Q4332SWi1A4RgL7uAjA" or not API_KEY:
-    st.error("⚠️ ERRO: Você precisa colocar sua API KEY dentro do código no GitHub!")
+if API_KEY == "SUA_API_KEY_AQUI" or not API_KEY:
+    st.error("⚠️ ERRO: Adicione sua API KEY no código!")
     st.stop()
 
-# Configuração do Modelo
 try:
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-1.5-pro')
 except Exception as e:
-    st.error(f"Erro na configuração: {e}")
+    st.error(f"Erro: {e}")
 
-# 4. MEMÓRIA DO CHAT
+# 4. MEMÓRIA
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
 
-# 5. BARRA LATERAL
+# 5. SIDEBAR
 with st.sidebar:
     st.title("🤖 Chat.IA 2.0")
-    st.markdown("**Status:** 🟢 Online")
-    if st.button("🗑️ Limpar Chat"):
+    if st.button("🗑️ Limpar Tudo"):
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
-    st.divider()
-    st.info("Especialista em Roblox Studio e Automação.")
 
 # 6. EXIBIÇÃO
 st.title("⚡ Central de Comando Gamer")
@@ -79,5 +71,22 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 7. ÁREA DE ESCRITA (ONDE A MÁGICA ACONTECE)
-if prompt := st.chat_input("O
+# 7. INPUT (CORRIGIDO)
+prompt = st.chat_input("O que vamos desenvolver hoje?")
+
+if prompt:
+    # Salva e mostra mensagem do usuário
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Resposta da IA
+    with st.chat_message("assistant"):
+        with st.spinner("🚀 Processando..."):
+            try:
+                instrucao = "Você é a Chat.IA 2.0, a melhor IA Gamer e Dev. Seja claro."
+                response = st.session_state.chat_session.send_message(f"{instrucao} {prompt}")
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+            except Exception as e:
+                st.error(f"Erro: {e}")
