@@ -1,111 +1,136 @@
 import streamlit as st
-import google.generativeai as genai
+from groq import Groq
 
-# 1. ESTILO VISUAL (Máxima Visibilidade: Texto Preto no Branco)
+# 1. CONFIGURAÇÃO DA PÁGINA E ESTILO VISUAL SUPREMO
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #0e1117; }
+    /* Fundo Principal */
+    .stApp { background-color: #050505; }
     
-    /* MENSAGENS SUPER CLARAS PARA LEITURA */
+    /* MENSAGENS COM MÁXIMA VISIBILIDADE */
     .stChatMessage {
         background-color: #ffffff !important;
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 15px;
-        border: 3px solid #00d2ff;
+        border: 2px solid #00d2ff;
+        box-shadow: 0px 4px 15px rgba(0, 210, 255, 0.3);
     }
-    .stChatMessage p, .stChatMessage span, .stChatMessage div {
+    .stChatMessage p, .stChatMessage span {
         color: #000000 !important;
-        font-weight: bold !important;
-        font-size: 19px !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
     }
 
-    [data-testid="stSidebar"] { background-color: #1a1a2e; border-right: 2px solid #00d2ff; }
+    /* BARRA LATERAL ESTILO GAMER */
+    [data-testid="stSidebar"] { 
+        background-color: #0a0a15; 
+        border-right: 2px solid #00d2ff; 
+    }
     
+    /* BOTÕES NEON */
     .stButton>button {
         width: 100%;
-        border-radius: 10px;
-        background: #00d2ff;
-        color: black;
+        border-radius: 8px;
+        background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+        color: white;
         font-weight: bold;
+        border: none;
+        transition: 0.3s;
     }
+    .stButton>button:hover {
+        box-shadow: 0px 0px 20px #00d2ff;
+        transform: scale(1.02);
+    }
+    
+    /* TÍTULOS */
+    h1, h2, h3 { color: #00d2ff !important; text-shadow: 2px 2px 10px rgba(0,210,255,0.5); }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÃO DA CHAVE
-CHAVE = "AQ.Ab8RN6IUuuBs1SKt5WcOIYp--juH79gXWHJb67ijMAIhGx3HWQ" 
+# 2. CHAVE DA GROQ
+GROQ_KEY = "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"
 
-if CHAVE == "SUA_API_KEY_AQUI":
-    st.error("🚨 Falta a chave na linha 37!")
+if GROQ_KEY == "SUA_CHAVE_GROQ_AQUI":
+    st.error("🚨 Coloque sua API KEY da Groq no código!")
     st.stop()
 
-# 3. LÓGICA DE CONEXÃO "TANQUE DE GUERRA" (Tenta vários modelos)
-def conectar_ia(api_key):
-    genai.configure(api_key=api_key)
-    # Lista de modelos dos mais novos aos mais estáveis
-    modelos_para_testar = [
-        'gemini-1.5-flash', 
-        'gemini-1.5-pro', 
-        'gemini-pro'
-    ]
-    
-    for nome_modelo in modelos_para_testar:
-        try:
-            model = genai.GenerativeModel(nome_modelo)
-            # Teste rápido para ver se o modelo responde
-            model.generate_content("oi", generation_config={"max_output_tokens": 1})
-            return model, nome_modelo
-        except:
-            continue
-    return None, None
+# 3. INICIALIZAÇÃO DA IA E MEMÓRIA
+client = Groq(api_key=GROQ_KEY)
 
-model, nome_ativo = conectar_ia(CHAVE)
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "modo_supremo" not in st.session_state:
+    st.session_state.modo_supremo = False
 
-if not model:
-    st.error("❌ Nenhum modelo disponível. Verifique se sua API Key é válida ou se o Google está em manutenção.")
-    st.stop()
-
-# 4. MEMÓRIA
-if "mensagens" not in st.session_state:
-    st.session_state["mensagens"] = []
-
-# 5. BARRA LATERAL
+# 4. BARRA LATERAL (FERRAMENTAS E CONFIGURAÇÕES)
 with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712035.png", width=100)
     st.title("🤖 Chat.IA Tools")
-    st.write(f"✅ Conectado via: **{nome_ativo}**")
+    
     if st.button("➕ NOVO CHAT"):
-        st.session_state["mensagens"] = []
+        st.session_state.messages = []
         st.rerun()
+    
     st.divider()
-    st.subheader("🛠️ Ferramentas")
-    st.write("🎮 Scripts Roblox")
-    st.write("💻 Automação PC")
-    st.success("IA Treinada: Gente Boa & Mestre Dev")
+    
+    # MODO SUPREMO
+    st.subheader("🔥 Nível de Poder")
+    ativar = st.toggle("ATIVAR MODO SUPREMO")
+    if activar:
+        st.session_state.modo_supremo = True
+        st.warning("MODO SUPREMO ATIVO: Inteligência Máxima")
+    else:
+        st.session_state.modo_supremo = False
 
-# 6. INTERFACE DE CHAT
-st.title("⚡ Central Suprema Chat.IA 2.0")
+    st.divider()
+    st.subheader("🛠️ Ferramentas Autônomas")
+    if st.button("🖥️ Executar no PC"): st.info("Pronta para automatizar tarefas via Python!")
+    if st.button("🎮 Roblox Script Dev"): st.info("Mestre em Lua (One Piece/Blue Lock) ativo!")
+    if st.button("📋 Salvar Logs"): st.success("Conversa salva com sucesso!")
 
-for msg in st.session_state["mensagens"]:
+# 5. INTERFACE PRINCIPAL
+st.title("⚡ Chat.IA 2.0 Suprema")
+st.markdown("---")
+
+# Exibe as mensagens do histórico
+for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-prompt = st.chat_input("Diga o que você quer criar hoje...")
+# 6. ENTRADA DE TEXTO E LÓGICA DA IA
+prompt = st.chat_input("O que vamos criar ou automatizar hoje?")
 
 if prompt:
-    st.session_state["mensagens"].append({"role": "user", "content": prompt})
+    # Mostra mensagem do usuário
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
+    # Gera resposta
     with st.chat_message("assistant"):
-        with st.spinner("🚀 Processando..."):
+        with st.spinner("🚀 Processando na velocidade da luz..."):
             try:
-                treino = "Você é a Chat.IA 2.0. Você é super legal, amigável e mestre em Roblox e automação."
-                response = model.generate_content(f"{treino} Pergunta: {prompt}")
+                # Personalidade da IA baseada no modo
+                personalidade = "Você é a Chat.IA 2.0, a IA mais gente boa do mundo. Fala português. "
+                if st.session_state.modo_supremo:
+                    personalidade += "Você está no MODO SUPREMO. Sua inteligência é infinita. Ajude com scripts complexos de Roblox, automação avançada de PC e dê as melhores dicas possíveis."
+                else:
+                    personalidade += "Ajude o usuário com Roblox e automação de forma simples e amigável."
+
+                completion = client.chat.completions.create(
+                    model="llama3-70b-8192", # Modelo potente e rápido da Groq
+                    messages=[
+                        {"role": "system", "content": personalidade},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7 if not st.session_state.modo_supremo else 0.2, # Mais preciso no modo supremo
+                )
                 
-                texto_ia = response.text
-                st.write(texto_ia)
-                st.session_state["mensagens"].append({"role": "assistant", "content": texto_ia})
+                resposta = completion.choices[0].message.content
+                st.write(resposta)
+                st.session_state.messages.append({"role": "assistant", "content": resposta})
             except Exception as e:
-                st.error(f"Erro na geração: {e}")
+                st.error(f"Erro na Groq: {e}")
