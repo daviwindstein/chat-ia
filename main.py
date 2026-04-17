@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. ESTILO VISUAL (Texto Preto no Branco - Super fácil de ler)
+# 1. ESTILO VISUAL (Texto preto no fundo branco para leitura perfeita)
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
@@ -23,25 +23,23 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 10px;
-        background: #00d2ff;
-        color: black;
-        font-weight: bold;
+        background: #00d2ff; color: black; font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # 2. CONFIGURAÇÃO DA CHAVE
-CHAVE = "AQ.Ab8RN6IJSugvxNfKfieQBxDVM7TtuHNZW6s5TKb4dzepBLLIdw" 
+CHAVE = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ" 
 
 if CHAVE == "SUA_API_KEY_AQUI":
-    st.error("🚨 Falta a chave na linha 36!")
+    st.error("🚨 Falta a chave na linha 34!")
     st.stop()
 
-# 3. LIGAÇÃO COM A IA (Ajustado para evitar o 404)
+# 3. LIGAÇÃO COM A IA (Usando o modelo LATEST para evitar o 404)
 try:
     genai.configure(api_key=CHAVE)
-    # Usando 'gemini-pro' que é o modelo mais estável para evitar o erro 404
-    model = genai.GenerativeModel('gemini-pro')
+    # Mudança Crítica: Usando o modelo LATEST (Versão Estável)
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 except Exception as e:
     st.error(f"Erro ao ligar a IA: {e}")
 
@@ -52,12 +50,11 @@ if "mensagens" not in st.session_state:
 # 5. BARRA LATERAL
 with st.sidebar:
     st.title("🤖 Chat.IA Tools")
-    if st.button("➕ LIMPAR CHAT"):
+    if st.button("➕ NOVO CHAT"):
         st.session_state["mensagens"] = []
         st.rerun()
     st.divider()
-    st.write("✅ Scripts Roblox")
-    st.write("✅ Automação de PC")
+    st.success("IA: Mestre em Roblox e Automação")
 
 # 6. INTERFACE
 st.title("⚡ Central Suprema Chat.IA 2.0")
@@ -74,12 +71,14 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🚀 A IA está pensando..."):
+        with st.spinner("🚀 Processando..."):
             try:
-                # Resposta direta para ser mais rápido
-                response = model.generate_content(prompt)
-                st.write(response.text)
-                st.session_state["mensagens"].append({"role": "assistant", "content": response.text})
+                # Treinamento direto
+                treino = "Você é a Chat.IA 2.0, mestre em Roblox e muito gente boa."
+                response = model.generate_content(f"{treino} Pergunta: {prompt}")
+                
+                texto_ia = response.text
+                st.write(texto_ia)
+                st.session_state["mensagens"].append({"role": "assistant", "content": texto_ia})
             except Exception as e:
-                st.error(f"Erro na resposta: {e}")
-                st.info("DICA FINAL: Se o erro persistir, gere uma NOVA chave no Google AI Studio. Chaves antigas dão erro 404.")
+                st.error(f"Erro técnico: {e}")
