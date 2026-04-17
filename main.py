@@ -46,7 +46,7 @@ st.markdown("""
 CHAVE_GROQ = "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" 
 
 if CHAVE_GROQ == "SUA_CHAVE_AQUI":
-    st.error("🚨 Você esqueceu de colocar a API KEY da Groq na linha 55!")
+    st.error("🚨 Você esqueceu de colocar a API KEY da Groq na linha 49!")
     st.stop()
 
 # 3. INICIALIZAÇÃO
@@ -55,7 +55,7 @@ client = Groq(api_key=CHAVE_GROQ)
 if "mensagens" not in st.session_state:
     st.session_state["mensagens"] = []
 
-# 4. BARRA LATERAL (CONFIGURAÇÕES E FERRAMENTAS)
+# 4. BARRA LATERAL
 with st.sidebar:
     st.title("🤖 Chat.IA Tools")
     
@@ -64,8 +64,6 @@ with st.sidebar:
         st.rerun()
     
     st.divider()
-    
-    # MODO SUPREMO (Corrigido)
     st.subheader("🔥 Nível de IA")
     modo_supremo = st.toggle("ATIVAR MODO SUPREMO")
     
@@ -82,7 +80,6 @@ with st.sidebar:
 st.title("⚡ Central Suprema Chat.IA 2.0")
 st.write("---")
 
-# Mostra o histórico
 for msg in st.session_state["mensagens"]:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
@@ -98,24 +95,17 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("🚀 Processando na velocidade da luz..."):
             try:
-                # Personalidade da IA
-                instrucao = (
-                    "Você é a Chat.IA 2.0, a IA mais gente boa e inteligente do mundo. "
-                    "Responda sempre em Português. "
-                )
-                
+                instrucao = "Você é a Chat.IA 2.0, mestre em Roblox e automação. Responda em Português."
                 if modo_supremo:
-                    instrucao += "Você está no MODO SUPREMO. Dê respostas extremamente detalhadas, técnicas e avançadas sobre Roblox Scripting e Automação."
-                else:
-                    instrucao += "Seja amigável, direta e ajude o usuário com o que ele precisar."
+                    instrucao += " MODO SUPREMO ATIVO: Use inteligência máxima e detalhes técnicos avançados."
 
-                # Chamada da Groq (Modelo Llama 3 70B - O mais forte)
+                # ATUALIZADO: Usando o modelo 'llama-3.3-70b-versatile' (O mais novo da Groq)
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": instrucao},
                         {"role": "user", "content": prompt}
                     ],
-                    model="llama3-70b-8192",
+                    model="llama-3.3-70b-versatile",
                     temperature=0.7 if not modo_supremo else 0.1,
                 )
                 
