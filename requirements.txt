@@ -1,4 +1,5 @@
 google-generativeai
-python-dotenv
-customtkinter
 pyautogui
+opencv-python
+pillow
+moviepy
