@@ -40,7 +40,7 @@ st.markdown("""
 # COLOQUE SUA CHAVE DENTRO DAS ASPAS ABAIXO
 API_KEY = "AQ.Ab8RN6ItXlslhI9nmaonzaJf0skZUb9Q4332SWi1A4RgL7uAjA" 
 
-if API_KEY == "SUA_API_KEY_AQUI" or not API_KEY:
+if API_KEY == "AQ.Ab8RN6LVss7-nEIz7qXuh5GSNFGa9AumoSt3eOYulvaSdnb-8A" or not API_KEY:
     st.error("⚠️ ERRO: Adicione sua API KEY no código!")
     st.stop()
 
