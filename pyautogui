@@ -12,3 +12,5 @@ def executar_comando_no_pc(script_gerado):
 # Exemplo de uso
 meu_script_roblox = "-- Script de exemplo\nprint('IA ativa no Roblox')"
 # executar_comando_no_pc(meu_script_roblox)
+
+pip install -q -U google-generativeai pyautogui
