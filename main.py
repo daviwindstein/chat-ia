@@ -1,12 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. ESTILO VISUAL (Texto preto no fundo branco para leitura perfeita)
+# 1. ESTILO VISUAL (Máxima Visibilidade: Texto Preto no Branco)
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; }
+    
+    /* MENSAGENS SUPER CLARAS PARA LEITURA */
     .stChatMessage {
         background-color: #ffffff !important;
         border-radius: 15px;
@@ -19,11 +21,15 @@ st.markdown("""
         font-weight: bold !important;
         font-size: 19px !important;
     }
+
     [data-testid="stSidebar"] { background-color: #1a1a2e; border-right: 2px solid #00d2ff; }
+    
     .stButton>button {
         width: 100%;
         border-radius: 10px;
-        background: #00d2ff; color: black; font-weight: bold;
+        background: #00d2ff;
+        color: black;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -32,16 +38,34 @@ st.markdown("""
 CHAVE = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ" 
 
 if CHAVE == "SUA_API_KEY_AQUI":
-    st.error("🚨 Falta a chave na linha 34!")
+    st.error("🚨 Falta a chave na linha 37!")
     st.stop()
 
-# 3. LIGAÇÃO COM A IA (Usando o modelo LATEST para evitar o 404)
-try:
-    genai.configure(api_key=CHAVE)
-    # Mudança Crítica: Usando o modelo LATEST (Versão Estável)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-except Exception as e:
-    st.error(f"Erro ao ligar a IA: {e}")
+# 3. LÓGICA DE CONEXÃO "TANQUE DE GUERRA" (Tenta vários modelos)
+def conectar_ia(api_key):
+    genai.configure(api_key=api_key)
+    # Lista de modelos dos mais novos aos mais estáveis
+    modelos_para_testar = [
+        'gemini-1.5-flash', 
+        'gemini-1.5-pro', 
+        'gemini-pro'
+    ]
+    
+    for nome_modelo in modelos_para_testar:
+        try:
+            model = genai.GenerativeModel(nome_modelo)
+            # Teste rápido para ver se o modelo responde
+            model.generate_content("oi", generation_config={"max_output_tokens": 1})
+            return model, nome_modelo
+        except:
+            continue
+    return None, None
+
+model, nome_ativo = conectar_ia(CHAVE)
+
+if not model:
+    st.error("❌ Nenhum modelo disponível. Verifique se sua API Key é válida ou se o Google está em manutenção.")
+    st.stop()
 
 # 4. MEMÓRIA
 if "mensagens" not in st.session_state:
@@ -50,13 +74,17 @@ if "mensagens" not in st.session_state:
 # 5. BARRA LATERAL
 with st.sidebar:
     st.title("🤖 Chat.IA Tools")
+    st.write(f"✅ Conectado via: **{nome_ativo}**")
     if st.button("➕ NOVO CHAT"):
         st.session_state["mensagens"] = []
         st.rerun()
     st.divider()
-    st.success("IA: Mestre em Roblox e Automação")
+    st.subheader("🛠️ Ferramentas")
+    st.write("🎮 Scripts Roblox")
+    st.write("💻 Automação PC")
+    st.success("IA Treinada: Gente Boa & Mestre Dev")
 
-# 6. INTERFACE
+# 6. INTERFACE DE CHAT
 st.title("⚡ Central Suprema Chat.IA 2.0")
 
 for msg in st.session_state["mensagens"]:
@@ -73,12 +101,11 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("🚀 Processando..."):
             try:
-                # Treinamento direto
-                treino = "Você é a Chat.IA 2.0, mestre em Roblox e muito gente boa."
+                treino = "Você é a Chat.IA 2.0. Você é super legal, amigável e mestre em Roblox e automação."
                 response = model.generate_content(f"{treino} Pergunta: {prompt}")
                 
                 texto_ia = response.text
                 st.write(texto_ia)
                 st.session_state["mensagens"].append({"role": "assistant", "content": texto_ia})
             except Exception as e:
-                st.error(f"Erro técnico: {e}")
+                st.error(f"Erro na geração: {e}")
