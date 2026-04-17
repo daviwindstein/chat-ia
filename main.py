@@ -35,7 +35,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. CONFIGURAÇÃO DA CHAVE
-CHAVE = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ" 
+CHAVE = "AQ.Ab8RN6IUuuBs1SKt5WcOIYp--juH79gXWHJb67ijMAIhGx3HWQ" 
 
 if CHAVE == "SUA_API_KEY_AQUI":
     st.error("🚨 Falta a chave na linha 37!")
