@@ -15,7 +15,7 @@ st.markdown("""
 # Verifique se não há espaços antes ou depois da chave!
 API_KEY = "SUA_NOVA_API_KEY_AQUI" 
 
-if API_KEY == "SUA_NOVA_API_KEY_AQUI":
+if API_KEY == "AQ.Ab8RN6LRamKSBKHwapcDoUdAVZEoAkNH-RolKfknu2QnS6yboQ":
     st.warning("Coloque sua API Key no código dentro do GitHub!")
     st.stop()
 
