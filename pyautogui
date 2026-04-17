@@ -1,0 +1,14 @@
+import pyautogui
+import time
+
+def executar_comando_no_pc(script_gerado):
+    # Simula o comando para abrir o Roblox Studio ou editor
+    # Cuidado: Use sempre em ambiente controlado!
+    print("Executando script no PC...")
+    time.sleep(2) # Tempo para você trocar de janela
+    pyautogui.write(script_gerado, interval=0.01)
+    pyautogui.press('enter')
+
+# Exemplo de uso
+meu_script_roblox = "-- Script de exemplo\nprint('IA ativa no Roblox')"
+# executar_comando_no_pc(meu_script_roblox)
