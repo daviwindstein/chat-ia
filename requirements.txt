@@ -1,3 +1,4 @@
 google-generativeai
 streamlit
 pyautogui
+pip install streamlit google-generativeai pyautogui
