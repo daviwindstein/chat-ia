@@ -1,105 +1,100 @@
 import streamlit as st
 import google.generativeai as genai
-import time
 
-# 1. ESTILO VISUAL (Cores Claros para Leitura)
+# 1. CONFIGURAÇÃO VISUAL (Cores claras e visíveis)
 st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp { background: #0f0c29; color: #ffffff; }
+    .stApp { background-color: #0e1117; color: #ffffff; }
     
-    /* Mensagens mais claras e legíveis */
+    /* Mensagens super claras para leitura */
     .stChatMessage {
-        background-color: rgba(255, 255, 255, 0.15); /* Fundo mais claro */
+        background-color: #f0f2f6 !important; /* Fundo cinza bem claro */
+        color: #000000 !important;           /* Texto preto para máximo contraste */
         border-radius: 15px;
-        padding: 15px;
-        color: #ffffff;
-        font-size: 18px;
-        border-left: 5px solid #00d2ff;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 2px solid #00d2ff;
     }
     
-    /* Barra Lateral Estilizada */
-    [data-testid="stSidebar"] {
-        background-color: #1a1a2e;
-        border-right: 2px solid #00d2ff;
-    }
+    /* Sidebar Profissional */
+    [data-testid="stSidebar"] { background-color: #1a1a2e; border-right: 2px solid #00d2ff; }
     
-    /* Botões Grandes e Azuis */
+    /* Botões Neon */
     .stButton>button {
         width: 100%;
         border-radius: 10px;
         background: #00d2ff;
         color: black;
         font-weight: bold;
-        height: 50px;
+        transition: 0.3s;
     }
+    .stButton>button:hover { transform: scale(1.02); box-shadow: 0px 0px 15px #00d2ff; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÃO DA CHAVE
-API_KEY = "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw" 
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-pro') # Modelo PRO para ser mais inteligente
+# 2. CONFIGURAÇÃO DA CHAVE (Substitua abaixo)
+CHAVE = "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw" 
 
-# 3. MEMÓRIA E CHATS SALVOS
-if "chats_salvos" not in st.session_state:
-    st.session_state.chats_salvos = {}
+if CHAVE == "AQ.Ab8RN6KzTALsAAi5XTQtxwOcfMXvzyHLlhb9JUYzbFjWdWJkNw":
+    st.error("🚨 Você esqueceu de colar sua API KEY dentro do código!")
+    st.stop()
+
+# Configuração com modelo FLASH (Evita o erro NotFound)
+try:
+    genai.configure(api_key=CHAVE)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"Erro na conexão: {e}")
+
+# 3. SISTEMA DE MEMÓRIA E CHATS
 if "mensagens" not in st.session_state:
     st.session_state.mensagens = []
-if "chat_ativo" not in st.session_state:
-    st.session_state.chat_ativo = "Novo Chat"
 
 # 4. BARRA LATERAL (FERRAMENTAS)
 with st.sidebar:
     st.title("🤖 Chat.IA Tools")
-    
-    if st.button("➕ Iniciar Novo Chat"):
+    if st.button("➕ Novo Chat / Limpar"):
         st.session_state.mensagens = []
         st.rerun()
-        
-    st.subheader("📁 Conversas Salvas")
-    # Simulação de chats salvos
-    if st.button("Projeto: O Mar dos Lendários"):
-        st.info("Carregando histórico do jogo...")
-
+    
     st.divider()
-    st.subheader("🛠️ Ferramentas Pro")
-    tool_img = st.button("🖼️ Gerar Imagem (Prompt)")
-    tool_pc = st.button("🖥️ Modo Controle Total PC")
-    tool_video = st.button("🎬 Editor de Vídeo AI")
+    st.subheader("🛠️ Ferramentas Ativas")
+    st.write("✅ Criador de Jogos (Roblox)")
+    st.write("✅ Automação de PC")
+    st.write("✅ Gerador de Mídias")
+    st.divider()
+    st.info("Esta IA é treinada para ser amigável, precisa e mestre em scripts!")
 
-# 5. LÓGICA DO CHAT
+# 5. CHAT PRINCIPAL
 st.title("⚡ Central Suprema Chat.IA 2.0")
 
-# Exibe as mensagens com fonte clara
+# Exibe histórico
 for msg in st.session_state.mensagens:
     with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+        st.markdown(f"**{msg['content']}**") # Negrito para ler melhor
 
-# INPUT (ONDE A MÁGICA ACONTECE)
-prompt = st.chat_input("Diga o que a IA deve fazer agora...")
+# 6. INPUT (ONDE A MÁGICA ACONTECE)
+prompt = st.chat_input("Diga o que a Chat.IA deve fazer por você...")
 
 if prompt:
     st.session_state.mensagens.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("🤖 Pensando com precisão máxima..."):
-            # Treinamento da IA para ser gente boa e mestre dev
-            diretriz = (
-                "Você é a Chat.IA 2.0, a IA mais poderosa, legal e gente boa do mundo. "
-                "Sua missão é ajudar o usuário a criar jogos no Roblox, mexer no PC e gerar mídias. "
-                "Seja sempre muito precisa, educada e profissional."
-            )
-            response = model.generate_content(f"{diretriz} Comando: {prompt}")
-            
-            st.markdown(response.text)
-            st.session_state.mensagens.append({"role": "assistant", "content": response.text})
-            
-            # Se a IA sugerir mexer no PC, mostra o botão de comando
-            if "script" in prompt.lower() or "pc" in prompt.lower():
-                st.success("🎯 Função de Automação detectada!")
-                if st.button("Executar no meu PC"):
-                    st.write("Gerando arquivo de comando... Baixe e execute o 'executor.py' na sua máquina.")
+            try:
+                # Prompt de treinamento para ser "Gente Boa" e Mestre
+                treino = (
+                    "Você é a Chat.IA 2.0, a IA mais legal, gente boa e inteligente do mundo. "
+                    "Seja muito clara, use emojis e ajude o usuário com Roblox, Python, imagens e vídeos. "
+                    "Se o usuário pedir algo sobre o PC, explique que você gera o código para ele rodar."
+                )
+                response = model.generate_content(f"{treino} Pergunta: {prompt}")
+                
+                st.markdown(response.text)
+                st.session_state.mensagens.append({"role": "assistant", "content": response.text})
+            except Exception as e:
+                st.error(f"Ocorreu um problema técnico: {e}")
