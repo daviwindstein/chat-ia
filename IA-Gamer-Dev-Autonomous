@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "Primeira versão da IA que mexe no PC"
+git branch -M main
+git remote add origin LINK_DO_SEU_REPO_AQUI
+git push -u origin main
