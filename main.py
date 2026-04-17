@@ -1,116 +1,78 @@
 import streamlit as st
 from groq import Groq
 
-# 1. ESTILO VISUAL SUPREMO (Texto Preto no Branco - Contraste Total)
-st.set_page_config(page_title="Chat.IA 2.0 Suprema", page_icon="⚡", layout="wide")
+# 1. ESTILO VISUAL (Preto com Neon Azul)
+st.set_page_config(page_title="Chat.IA 2.0 AGENTE", page_icon="🤖", layout="wide")
 
 st.markdown("""
     <style>
     .stApp { background-color: #050505; }
-    
-    /* CAIXA DE MENSAGEM - MÁXIMA LEITURA */
-    .stChatMessage {
-        background-color: #ffffff !important;
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 15px;
-        border: 3px solid #00d2ff;
-    }
-    /* Texto dentro das mensagens: Preto e Negrito */
-    .stChatMessage p, .stChatMessage span, .stChatMessage div {
-        color: #000000 !important;
-        font-weight: 800 !important;
-        font-size: 19px !important;
-    }
-
-    /* BARRA LATERAL ESTILO GAMER */
-    [data-testid="stSidebar"] { 
-        background-color: #0a0a15; 
-        border-right: 2px solid #00d2ff; 
-    }
-    
-    /* BOTÕES NEON */
-    .stButton>button {
-        width: 100%;
-        border-radius: 10px;
-        background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-        color: white;
-        font-weight: bold;
-        height: 50px;
-        border: none;
-    }
+    .stChatMessage { background-color: #ffffff !important; border-radius: 15px; border: 3px solid #00d2ff; }
+    .stChatMessage p, .stChatMessage span { color: #000000 !important; font-weight: 800 !important; font-size: 18px !important; }
+    [data-testid="stSidebar"] { background-color: #0a0a15; border-right: 2px solid #00d2ff; }
+    .stButton>button { width: 100%; border-radius: 10px; background: linear-gradient(45deg, #00d2ff, #ff00ff); color: white; font-weight: bold; height: 50px; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CHAVE DA GROQ
-CHAVE_GROQ = "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" 
+# 2. CHAVE
+CHAVE_GROQ = "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"
 
 if CHAVE_GROQ == "SUA_CHAVE_AQUI":
-    st.error("🚨 Você esqueceu de colocar a API KEY da Groq na linha 49!")
+    st.error("🚨 Coloque a Chave da Groq na linha 48!")
     st.stop()
 
-# 3. INICIALIZAÇÃO
 client = Groq(api_key=CHAVE_GROQ)
 
 if "mensagens" not in st.session_state:
     st.session_state["mensagens"] = []
 
-# 4. BARRA LATERAL
+# 3. BARRA LATERAL COM PODERES DE AGENTE
 with st.sidebar:
-    st.title("🤖 Chat.IA Tools")
-    
+    st.title("⚙️ Painel de Controle")
     if st.button("➕ NOVO CHAT"):
         st.session_state["mensagens"] = []
         st.rerun()
     
     st.divider()
-    st.subheader("🔥 Nível de IA")
-    modo_supremo = st.toggle("ATIVAR MODO SUPREMO")
-    
-    if modo_supremo:
-        st.warning("MODO SUPREMO: ON ⚡")
+    modo_agente = st.toggle("ATIVAR MODO AGENTE (PC CONTROL)")
+    if modo_agente:
+        st.warning("⚠️ MODO AGENTE: A IA vai gerar comandos para o seu sistema!")
     
     st.divider()
-    st.subheader("🛠️ Ferramentas")
-    if st.button("🖥️ Automação de PC"): st.info("Pronta para criar scripts de automação!")
-    if st.button("🎮 Roblox Dev (Lua)"): st.info("Especialista em One Piece e Blue Lock!")
-    st.success("IA: Gente Boa & Mestre")
+    st.subheader("🚀 Comandos Rápidos")
+    if st.button("Abrir Roblox Studio"): st.code("import os; os.startfile('path_to_roblox')")
+    if st.button("Script de Obby"): st.info("Peça o script no chat!")
 
-# 5. INTERFACE PRINCIPAL
-st.title("⚡ Central Suprema Chat.IA 2.0")
-st.write("---")
+# 4. INTERFACE
+st.title("🤖 Chat.IA 2.0 - Agente Autônomo")
 
 for msg in st.session_state["mensagens"]:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. ENTRADA DE TEXTO
-prompt = st.chat_input("Diga o que você quer criar hoje...")
+prompt = st.chat_input("O que você quer que eu faça no seu PC ou Roblox?")
 
 if prompt:
     st.session_state["mensagens"].append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
+    with st.chat_message("user"): st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🚀 Processando na velocidade da luz..."):
+        with st.spinner("🔧 Preparando comandos..."):
             try:
-                instrucao = "Você é a Chat.IA 2.0, mestre em Roblox e automação. Responda em Português."
-                if modo_supremo:
-                    instrucao += " MODO SUPREMO ATIVO: Use inteligência máxima e detalhes técnicos avançados."
-
-                # ATUALIZADO: Usando o modelo 'llama-3.3-70b-versatile' (O mais novo da Groq)
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": instrucao},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model="llama-3.3-70b-versatile",
-                    temperature=0.7 if not modo_supremo else 0.1,
+                # Treinamento focado em Automação (PyAutoGUI e OS)
+                instrucao = (
+                    "Você é a Chat.IA 2.0 Agente. Sua missão é controlar o PC do usuário. "
+                    "Quando ele pedir para abrir algo ou mexer no Roblox, forneça scripts Python usando as bibliotecas 'pyautogui', 'os' ou 'subprocess'. "
+                    "Explique para ele que ele deve rodar esse código no PC dele para a mágica acontecer."
                 )
                 
-                resposta = chat_completion.choices[0].message.content
+                completion = client.chat.completions.create(
+                    messages=[{"role": "system", "content": instrucao}, {"role": "user", "content": prompt}],
+                    model="llama-3.3-70b-versatile",
+                )
+                
+                resposta = completion.choices[0].message.content
                 st.write(resposta)
                 st.session_state["mensagens"].append({"role": "assistant", "content": resposta})
             except Exception as e:
-                st.error(f"Erro na Groq: {e}")
+                st.error(f"Erro: {e}")
