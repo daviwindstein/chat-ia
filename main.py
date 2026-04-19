@@ -15,7 +15,7 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 15px;
         border: 3px solid #00ffaa;
-        box-shadow: 0px 4px 20px rgba(0, 255, 170, 0.3);
+        box-shadow: 0px 4px 20px rgba(0, 255, 170, 0.4);
     }
     .stChatMessage p, .stChatMessage span {
         color: #000000 !important;
@@ -54,9 +54,9 @@ with st.sidebar:
     st.subheader("🛠️ CENTRAL DE FERRAMENTAS")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🖼️ IMAGEM"): st.toast("🎨 IA Criando Imagem...")
+        if st.button("🖼️ IMAGEM"): st.toast("🎨 Modo Criador de Imagens...")
     with col2:
-        if st.button("🎬 VÍDEO"): st.toast("🎬 IA Criando Vídeo...")
+        if st.button("🎬 VÍDEO"): st.toast("🎬 Modo Criador de Vídeos...")
     
     st.divider()
     modo_atual = st.selectbox("🎯 ATIVAR MODO:", [
@@ -76,7 +76,7 @@ for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. LÓGICA DE INTELIGÊNCIA MÁXIMA
+# 5. LÓGICA DE INTELIGÊNCIA MÁXIMA (CORRIGIDA)
 prompt = st.chat_input("Diga algo para a SuperGroq...")
 
 if prompt:
@@ -93,7 +93,6 @@ if prompt:
             try:
                 client = Groq(api_key=GROQ_API_KEY.strip())
                 
-                # Instrução Mestra com todos os seus pedidos
                 instrucao_suprema = f"""
                 Você é a SuperGroq, a inteligência artificial mais avançada, gentil, engraçada e carismática do planeta. 
                 Hoje é {AGORA}. Você está operando em {CIDADE} com {TEMPERATURA}.
@@ -113,12 +112,13 @@ if prompt:
                 Sempre supere as expectativas! Você é a melhor de todas. 🚀✨
                 """
 
+                # MODELO ATUALIZADO PARA NÃO DAR MAIS ERRO 400
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": instrucao_suprema},
                         {"role": "user", "content": prompt}
                     ],
-                    model="llama-3.3-70b-specdec", # O modelo mais rápido e inteligente da Groq
+                    model="llama-3.3-70b-versatile", 
                     temperature=0.7,
                 )
 
