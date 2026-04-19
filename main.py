@@ -42,29 +42,20 @@ if "historico_chats" not in st.session_state:
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL - NOMES DAS IAS DA FOTO
+# 4. BARRA LATERAL - IAS DA FOTO (Usando o motor Flash que não dá erro)
 with st.sidebar:
     st.title("🔮 OMNI HUB 2026")
     st.write(f"📅 **Hoje:** {AGORA}")
     
-    # Nomes simplificados para não dar erro 404
     opcoes_ia = {
-        "🚀 SuperGroq": "gemini-1.5-flash",
-        "💎 Gemini 3.1 Pro": "gemini-1.5-pro",
-        "🤖 ChatGPT Pro": "gemini-1.5-pro",
-        "🧠 Claude 3.6 Pro": "gemini-1.5-pro"
-    }
-    
-    instrucoes = {
-        "🚀 SuperGroq": "Você é o SuperGroq. Responda muito rápido e seja técnico.",
-        "💎 Gemini 3.1 Pro": "Você é o Gemini 3.1 Pro. Foco em lógica superior.",
-        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro. Seja muito criativo e detalhista.",
-        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Mestre em Roblox (Lua) e redação."
+        "🚀 SuperGroq": "Você é o SuperGroq. Seja ultra rápido e técnico.",
+        "💎 Gemini 3.1 Pro": "Você é o Gemini 1.5 Pro. Seja lógico e brilhante.",
+        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro. Seja criativo e amigável.",
+        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Seja mestre em Lua e escrita."
     }
     
     escolha_nome = st.selectbox("🤖 SELECIONE A IA:", list(opcoes_ia.keys()))
-    modelo_id = opcoes_ia[escolha_nome]
-    personalidade = instrucoes[escolha_nome]
+    personalidade = opcoes_ia[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
@@ -88,12 +79,12 @@ for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. LÓGICA DE RESPOSTA (SEM PREFIXO MODELS/ PARA TESTAR)
-prompt = st.chat_input("Como posso te ajudar agora?")
+# 7. LÓGICA DE RESPOSTA (USANDO GEMINI-1.5-FLASH PARA EVITAR 404)
+prompt = st.chat_input("Diga o que você precisa agora...")
 
 if prompt:
     if GOOGLE_CHAVE == "SUA_CHAVE_AQUI":
-        st.error("🚨 Coloque a chave na linha 40!")
+        st.error("🚨 Mano, coloca a chave na linha 40!")
         st.stop()
 
     genai.configure(api_key=GOOGLE_CHAVE.strip())
@@ -105,9 +96,9 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner(f"🧠 {escolha_nome} conectando..."):
             try:
-                # TENTATIVA 1: Nome direto (mais comum de funcionar)
+                # O segredo: 'gemini-1.5-flash' é o mais estável e aceita tudo
                 model = genai.GenerativeModel(
-                    model_name=modelo_id,
+                    model_name='gemini-1.5-flash',
                     system_instruction=f"Você é a Chat.IA Omni Pro. Hoje é {AGORA}. {personalidade} Mestra em Roblox e Escola. Gentil e engraçada.",
                     safety_settings=[
                         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -122,16 +113,8 @@ if prompt:
                     mensagens_atuais.append({"role": "assistant", "content": response.text})
                     st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
                 else:
-                    st.warning("IA não respondeu. Tente novamente!")
+                    st.warning("IA não respondeu. Tente de novo! 😅")
             
             except Exception as e:
-                # TENTATIVA 2: Se a primeira falhar, tenta com o prefixo 'models/'
-                try:
-                    model = genai.GenerativeModel(model_name=f"models/{modelo_id}")
-                    response = model.generate_content(prompt)
-                    st.write(response.text)
-                    mensagens_atuais.append({"role": "assistant", "content": response.text})
-                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
-                except Exception as e2:
-                    st.error(f"Erro Crítico: O Google não reconheceu o modelo {modelo_id}. Verifique se sua chave API no AI Studio tem acesso ao Gemini 1.5.")
-                    st.info(f"Detalhe técnico: {e2}")
+                st.error(f"Erro ao falar com a IA: {e}")
+                st.info("💡 Se o erro 404 persistir, tente criar uma NOVA chave no AI Studio.")
