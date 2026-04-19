@@ -34,7 +34,7 @@ st.markdown("""
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 
 # --- COLOQUE SUA CHAVE AQUI ---
-GOOGLE_CHAVE = "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M" 
+GOOGLE_CHAVE = "AIzaSyC08xg4y75-DjrGQQWh2Ib6WP19Krlx4VU" 
 # ------------------------------
 
 if "historico_chats" not in st.session_state:
