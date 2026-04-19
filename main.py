@@ -34,7 +34,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS E MEMÓRIA
+# 2. DADOS E MEMÓRIA (2026)
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 CIDADE = "Carazinho - RS"
 TEMPERATURA = "21°C"
@@ -43,26 +43,30 @@ TEMPERATURA = "21°C"
 GROQ_API_KEY = "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" 
 # --------------------------------------
 
-# Função para salvar chats no computador (Memória)
+# Função para salvar a memória no computador
 def salvar_chat(id_chat, mensagens):
-    if not os.path.exists("arquivos_chat"): os.makedirs("arquivos_chat")
-    with open(f"arquivos_chat/{id_chat}.json", "w") as f:
-        json.dump(mensagens, f)
+    if not os.path.exists("arquivos_chat"):
+        os.makedirs("arquivos_chat")
+    with open(f"arquivos_chat/{id_chat}.json", "w", encoding="utf-8") as f:
+        json.dump(mensagens, f, ensure_ascii=False, indent=4)
 
-if "historico" not in st.session_state: st.session_state.historico = []
-if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
+if "historico" not in st.session_state:
+    st.session_state.historico = []
+if "chat_id" not in st.session_state:
+    st.session_state.chat_id = str(uuid.uuid4())
 
-# 3. BARRA LATERAL (Gestão de Arquivos e Memória)
+# 3. BARRA LATERAL (Arquivos e Modos)
 with st.sidebar:
     st.title("⚡ SUPERGROQ OMNI")
-    st.write(f"📅 {AGORA} | 📍 {CIDADE}")
+    st.write(f"📅 **Data:** {AGORA}")
+    st.write(f"📍 **Local:** {CIDADE}")
     
     st.divider()
-    st.subheader("📁 ENVIAR PARA EDIÇÃO")
-    arquivo_up = st.file_uploader("Mande imagem ou vídeo para a IA ver:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov'])
+    st.subheader("📁 ENVIAR PARA ANÁLISE/EDIÇÃO")
+    arquivo_up = st.file_uploader("Mande imagem ou vídeo:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov'])
     
     if arquivo_up:
-        st.success(f"✅ {arquivo_up.name} pronto para análise!")
+        st.success(f"🎥 Arquivo '{arquivo_up.name}' carregado!")
 
     st.divider()
     modo_atual = st.selectbox("🎯 ATIVAR MODO:", [
@@ -70,52 +74,69 @@ with st.sidebar:
         "Trabalho", "Dicas", "YouTuber", "Ajuda"
     ])
     
-    if st.button("🗑️ LIMPAR TUDO"):
+    if st.button("🗑️ RESETAR SISTEMA"):
         st.session_state.historico = []
         st.session_state.chat_id = str(uuid.uuid4())
         st.rerun()
 
-# 4. INTERFACE PRINCIPAL
-st.title(f"✨ SuperGroq 2.0 (Modo {modo_atual})")
+# 4. INTERFACE DE CHAT
+st.title(f"✨ SuperGroq 2.0 - Modo {modo_atual}")
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. LÓGICA DE INTELIGÊNCIA COM VISÃO
-prompt = st.chat_input("Diga o que fazer com o arquivo ou peça ajuda...")
+# 5. LÓGICA DE INTELIGÊNCIA (Corrigida)
+prompt = st.chat_input("Como a IA mais inteligente do mundo pode te ajudar?")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Coloque a chave da Groq na linha 46!")
+        st.error("🚨 Mano, você esqueceu a chave na linha 46!")
         st.stop()
 
-    conteudo_usuario = prompt
+    # Prepara a mensagem com o arquivo (se houver)
+    msg_usuario = prompt
     if arquivo_up:
-        conteudo_usuario = f"[ARQUIVO ENVIADO: {arquivo_up.name}] - " + prompt
+        msg_usuario = f"📎 [ARQUIVO: {arquivo_up.name}] - {prompt}"
 
-    st.session_state.historico.append({"role": "user", "content": conteudo_usuario})
+    st.session_state.historico.append({"role": "user", "content": msg_usuario})
     with st.chat_message("user"):
-        st.write(conteudo_usuario)
+        st.write(msg_usuario)
 
     with st.chat_message("assistant"):
-        with st.spinner("🧠 Analisando e processando..."):
+        with st.spinner("🧠 SuperGroq processando..."):
             try:
                 client = Groq(api_key=GROQ_API_KEY.strip())
                 
                 instrucao_suprema = f"""
-                Você é a SuperGroq, a IA mais inteligente, gentil e engraçada do mundo. 
-                Hoje é {AGORA}, local {CIDADE}.
+                Você é a SuperGroq, a inteligência artificial mais avançada, gentil e engraçada do mundo.
+                Estamos em {AGORA}, local {CIDADE}.
                 
-                SEU ESTADO ATUAL: {modo_atual}.
+                SEU MODO ATUAL: {modo_atual}.
                 
-                DENTRO DO MODO EDITOR:
-                Se o usuário mandar uma imagem ou vídeo (indicado no prompt), aja como uma editora profissional. 
-                Dê dicas de cores, cortes, efeitos e como melhorar o conteúdo para o YouTube ou redes sociais.
+                HABILIDADES:
+                - EDITOR: Se o usuário enviou arquivo, analise os detalhes e dê dicas profissionais de edição, cores e roteiro.
+                - CRIADOR DE JOGOS: Mestre em Lua para Roblox (Scripts de Terror, RPG, GUI).
+                - ESCOLA/TRABALHO: Resolva tudo com perfeição e bom humor.
                 
-                PERSONALIDADE: Seja carismática, use emojis e ajude em TUDO (Roblox, Escola, Trabalho).
-                Seja a melhor amiga do usuário! 🚀✨
+                PERSONALIDADE: Ultra carismática, usa muitos emojis e é a melhor amiga do usuário! 🚀✨
                 """
 
+                # Montagem das mensagens para a Groq (mantendo o contexto)
+                mensagens_com_sistema = [{"role": "system", "content": instrucao_suprema}] + st.session_state.historico
+
                 chat_completion = client.chat.completions.create(
-                    messages
+                    messages=mensagens_com_sistema,
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.7,
+                )
+
+                resposta = chat_completion.choices[0].message.content
+                st.write(resposta)
+                st.session_state.historico.append({"role": "assistant", "content": resposta})
+                
+                # Salva o chat para não perder os dados
+                salvar_chat(st.session_state.chat_id, st.session_state.historico)
+
+            except Exception as e:
+                st.error(f"Eita! Erro ao processar: {e}")
