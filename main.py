@@ -43,7 +43,7 @@ if "historico_chats" not in st.session_state:
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 3. BARRA LATERAL - AS IAS QUE VOCÊ PEDIU (Modelos reais)
+# 3. BARRA LATERAL - AS IAS QUE VOCÊ PEDIU
 with st.sidebar:
     st.title("🔮 OMNI HUB PRO")
     st.write(f"📅 **Hoje:** {AGORA}")
@@ -71,7 +71,10 @@ with st.sidebar:
             st.rerun()
 
 # 4. GERENCIAMENTO DE MENSAGENS
-mensagens_atuais = st.session_state.historico_chats.get(st.session_state.chat_atual_id, [])
+if st.session_state.chat_atual_id not in st.session_state.historico_chats:
+    st.session_state.historico_chats[st.session_state.chat_atual_id] = []
+
+mensagens_atuais = st.session_state.historico_chats[st.session_state.chat_atual_id]
 
 # 5. INTERFACE
 st.title(f"✨ {escolha_nome}")
@@ -80,12 +83,12 @@ for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. LÓGICA DE RESPOSTA (CONECTANDO A TODAS AS IAS)
+# 6. LÓGICA DE RESPOSTA (SEM ERROS DE ACENTO)
 prompt = st.chat_input("Comande sua IA de 2026...")
 
 if prompt:
     if OPENROUTER_KEY == "SUA_CHAVE_OPENROUTER_AQUI":
-        st.error("🚨 Você precisa da chave do OpenRouter na linha 40!")
+        st.error("🚨 Mano, você esqueceu de colocar a chave do OpenRouter na linha 40!")
         st.stop()
 
     mensagens_atuais.append({"role": "user", "content": prompt})
@@ -93,10 +96,10 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner(f"🔌 Conectando ao cérebro do {escolha_nome}..."):
+        with st.spinner(f"🔌 Conectando ao {escolha_nome}..."):
             try:
-                # Instrução Mestra
-                instrucao = f"Você é a Chat.IA Omni Pro, agindo como {escolha_nome}. Hoje é {AGORA}. Você é gentil, engraçada e mestre em Roblox (Lua) e escola."
+                # Instrução Mestra (sem acento no nome da variável para não dar erro)
+                instrucao_mestra = f"Você é a Chat.IA Omni Pro, agindo como {escolha_nome}. Hoje é {AGORA}. Você é gentil, engraçada e mestre em Roblox (Lua) e escola."
                 
                 response = requests.post(
                     url="https://openrouter.ai/api/v1/chat/completions",
@@ -107,7 +110,7 @@ if prompt:
                     data=json.dumps({
                         "model": modelo_id,
                         "messages": [
-                            {"role": "system", "content": instrução},
+                            {"role": "system", "content": instrucao_mestra},
                             {"role": "user", "content": prompt}
                         ]
                     })
@@ -123,7 +126,6 @@ if prompt:
                 else:
                     erro_msg = resultado.get('error', {}).get('message', 'Erro desconhecido')
                     st.error(f"Erro na IA: {erro_msg}")
-                    st.info("Dica: Alguns modelos Pro exigem saldo no OpenRouter. Tente o SuperGroq (que é Free) para testar!")
             
             except Exception as e:
                 st.error(f"Erro de conexão: {e}")
