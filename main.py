@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 
-# 1. ESTILO VISUAL SUPREMO (Neon e Dark)
+# 1. ESTILO VISUAL (Neon e Dark)
 st.set_page_config(page_title="SuperGroq OMNI PRO", page_icon="⚡", layout="wide")
 
 st.markdown("""
@@ -17,126 +17,119 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 15px;
         border: 3px solid #00ffaa;
-        box-shadow: 0px 4px 20px rgba(0, 255, 170, 0.4);
     }
     .stChatMessage p, .stChatMessage span {
-        color: #000000 !important;
-        font-weight: 700 !important;
-        font-size: 18px !important;
+        color: #000000 !important; font-weight: 700 !important; font-size: 18px !important;
     }
-    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; }
+    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; overflow-y: auto; }
     .stButton>button {
-        width: 100%; border-radius: 12px;
-        background: linear-gradient(45deg, #00ffaa, #00d2ff);
-        color: #000; font-weight: bold; height: 45px; border: none;
+        width: 100%; border-radius: 10px; background: linear-gradient(45deg, #00ffaa, #00d2ff);
+        color: #000; font-weight: bold; border: none; margin-bottom: 5px;
     }
-    h1, h2, h3 { color: #ffffff !important; text-shadow: 2px 2px 10px #00ffaa; }
+    .chat-link {
+        padding: 10px; border-radius: 5px; background: #1a1a1a; margin-bottom: 5px;
+        cursor: pointer; border: 1px solid #333; text-align: left; color: #ccc;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS E MEMÓRIA (2026)
+# 2. CONFIGURAÇÕES E PASTAS
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
-CIDADE = "Carazinho - RS"
-TEMPERATURA = "21°C"
+PASTA_CHATS = "arquivos_chat"
+if not os.path.exists(PASTA_CHATS): os.makedirs(PASTA_CHATS)
 
 # --- COLOQUE SUA CHAVE DA GROQ AQUI ---
 GROQ_API_KEY = "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" 
 # --------------------------------------
 
-# Função para salvar a memória no computador
-def salvar_chat(id_chat, mensagens):
-    if not os.path.exists("arquivos_chat"):
-        os.makedirs("arquivos_chat")
-    with open(f"arquivos_chat/{id_chat}.json", "w", encoding="utf-8") as f:
+# 3. FUNÇÕES DE MEMÓRIA
+def carregar_mensagens(id_chat):
+    caminho = f"{PASTA_CHATS}/{id_chat}.json"
+    if os.path.exists(caminho):
+        with open(caminho, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+def salvar_mensagens(id_chat, mensagens):
+    with open(f"{PASTA_CHATS}/{id_chat}.json", "w", encoding="utf-8") as f:
         json.dump(mensagens, f, ensure_ascii=False, indent=4)
 
-if "historico" not in st.session_state:
-    st.session_state.historico = []
+# 4. GERENCIAMENTO DE ESTADO
 if "chat_id" not in st.session_state:
     st.session_state.chat_id = str(uuid.uuid4())
+if "historico" not in st.session_state:
+    st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
 
-# 3. BARRA LATERAL (Arquivos e Modos)
+# 5. BARRA LATERAL (IGUAL AO GEMINI)
 with st.sidebar:
-    st.title("⚡ SUPERGROQ OMNI")
-    st.write(f"📅 **Data:** {AGORA}")
-    st.write(f"📍 **Local:** {CIDADE}")
+    st.title("⚡ SUPERGROQ")
     
-    st.divider()
-    st.subheader("📁 ENVIAR PARA ANÁLISE/EDIÇÃO")
-    arquivo_up = st.file_uploader("Mande imagem ou vídeo:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov'])
-    
-    if arquivo_up:
-        st.success(f"🎥 Arquivo '{arquivo_up.name}' carregado!")
-
-    st.divider()
-    modo_atual = st.selectbox("🎯 ATIVAR MODO:", [
-        "Escolar", "Criador de Jogos", "Editor de Vídeo/Imagem", 
-        "Trabalho", "Dicas", "YouTuber", "Ajuda"
-    ])
-    
-    if st.button("🗑️ RESETAR SISTEMA"):
-        st.session_state.historico = []
+    # Botão de Novo Chat
+    if st.button("➕ NOVO CHAT", use_container_width=True):
         st.session_state.chat_id = str(uuid.uuid4())
+        st.session_state.historico = []
         st.rerun()
+    
+    st.divider()
+    st.subheader("💬 Conversas Recentes")
+    
+    # Listar chats salvos
+    arquivos = sorted(os.listdir(PASTA_CHATS), key=lambda x: os.path.getmtime(os.path.join(PASTA_CHATS, x)), reverse=True)
+    
+    for arq in arquivos:
+        cid = arq.replace(".json", "")
+        msgs = carregar_mensagens(cid)
+        if msgs:
+            # Pega o começo da primeira mensagem do usuário como título
+            titulo = msgs[0]["content"][:20] + "..."
+            if st.button(f"📄 {titulo}", key=cid):
+                st.session_state.chat_id = cid
+                st.session_state.historico = msgs
+                st.rerun()
 
-# 4. INTERFACE DE CHAT
-st.title(f"✨ SuperGroq 2.0 - Modo {modo_atual}")
+# 6. INTERFACE DE CHAT
+st.title("✨ SuperGroq OMNI PRO")
+st.write(f"📅 {AGORA} | 📍 Carazinho - RS")
+
+# Seletor de Modo
+modo = st.selectbox("🎯 Modo:", ["Criador de Jogos", "Escolar", "YouTuber", "Editor", "Dicas"])
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. LÓGICA DE INTELIGÊNCIA (Corrigida)
-prompt = st.chat_input("Como a IA mais inteligente do mundo pode te ajudar?")
+# 7. LÓGICA DE INTELIGÊNCIA
+prompt = st.chat_input("Diga algo para a SuperGroq...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Mano, você esqueceu a chave na linha 46!")
+        st.error("🚨 Coloque a chave na linha 48!")
         st.stop()
 
-    # Prepara a mensagem com o arquivo (se houver)
-    msg_usuario = prompt
-    if arquivo_up:
-        msg_usuario = f"📎 [ARQUIVO: {arquivo_up.name}] - {prompt}"
-
-    st.session_state.historico.append({"role": "user", "content": msg_usuario})
+    # Adiciona mensagem do usuário
+    st.session_state.historico.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(msg_usuario)
+        st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🧠 SuperGroq processando..."):
+        with st.spinner("🧠 Pensando..."):
             try:
                 client = Groq(api_key=GROQ_API_KEY.strip())
+                instrucao = f"Você é a SuperGroq, gentil, engraçada e mestre em tudo. Modo: {modo}. Hoje é {AGORA} em Carazinho."
                 
-                instrucao_suprema = f"""
-                Você é a SuperGroq, a inteligência artificial mais avançada, gentil e engraçada do mundo.
-                Estamos em {AGORA}, local {CIDADE}.
+                mensagens_com_sistema = [{"role": "system", "content": instrucao}] + st.session_state.historico
                 
-                SEU MODO ATUAL: {modo_atual}.
-                
-                HABILIDADES:
-                - EDITOR: Se o usuário enviou arquivo, analise os detalhes e dê dicas profissionais de edição, cores e roteiro.
-                - CRIADOR DE JOGOS: Mestre em Lua para Roblox (Scripts de Terror, RPG, GUI).
-                - ESCOLA/TRABALHO: Resolva tudo com perfeição e bom humor.
-                
-                PERSONALIDADE: Ultra carismática, usa muitos emojis e é a melhor amiga do usuário! 🚀✨
-                """
-
-                # Montagem das mensagens para a Groq (mantendo o contexto)
-                mensagens_com_sistema = [{"role": "system", "content": instrucao_suprema}] + st.session_state.historico
-
-                chat_completion = client.chat.completions.create(
+                res = client.chat.completions.create(
                     messages=mensagens_com_sistema,
                     model="llama-3.3-70b-versatile",
                     temperature=0.7,
                 )
 
-                resposta = chat_completion.choices[0].message.content
+                resposta = res.choices[0].message.content
                 st.write(resposta)
                 st.session_state.historico.append({"role": "assistant", "content": resposta})
                 
-                # Salva o chat para não perder os dados
-                salvar_chat(st.session_state.chat_id, st.session_state.historico)
-
+                # Salva no arquivo
+                salvar_mensagens(st.session_state.chat_id, st.session_state.historico)
             except Exception as e:
-                st.error(f"Eita! Erro ao processar: {e}")
+                st.error(f"Erro: {e}")
