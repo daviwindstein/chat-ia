@@ -1,4 +1,5 @@
 import streamlit as st
+import google.generativeai as genai
 import requests
 import json
 import uuid
@@ -30,29 +31,30 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CHAVE DO OPENROUTER
-OPENROUTER_KEY = "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"
+# 2. CONFIGURAÇÃO DE CHAVES (COLOQUE AS SUAS AQUI)
+GOOGLE_CHAVE = "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M"
+OPENROUTER_CHAVE = ""
 
-# 3. MEMÓRIA DO SISTEMA
+# 3. SISTEMA DE MEMÓRIA
 if "historico_chats" not in st.session_state:
     st.session_state.historico_chats = {}
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL
+# 4. BARRA LATERAL - SELETOR COM AS "IAS CERTAS"
 with st.sidebar:
-    st.title("🔮 OMNI PRO HUB")
+    st.title("🔮 OMNI HUB PRO")
     
+    # Mapeamento: O nome que você quer vs o modelo que será usado
     opcoes_ia = {
-        "🚀 SuperGroq": "meta-llama/llama-3.3-70b-instruct",
-        "💎 Gemini 3.1 Pro": "google/gemini-pro-1.5",
-        "🤖 ChatGPT Pro": "openai/gpt-4o",
-        "🧠 Claude 3.6 Pro": "anthropic/claude-3.5-sonnet",
-        "🆓 Gemini Grátis": "google/gemini-2.0-flash-exp:free"
+        "💎 Gemini 3.1 Pro (Google)": "google-pro", # Usa o Google AI Studio
+        "🚀 SuperGroq (Llama 3.3 Free)": "meta-llama/llama-3.3-70b-instruct:free",
+        "🤖 ChatGPT Pro (Gemma 2 Free)": "google/gemma-2-9b-it:free",
+        "🧠 Claude 3.6 Pro (Phi-3 Free)": "microsoft/phi-3-medium-128k-instruct:free"
     }
     
-    escolha_nome = st.selectbox("ESCOLHA A SUA IA PRO:", list(opcoes_ia.keys()))
-    ia_modelo_real = opcoes_ia[escolha_nome]
+    escolha_nome = st.selectbox("ESCOLHA O CÉREBRO:", list(opcoes_ia.keys()))
+    ia_id = opcoes_ia[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
@@ -80,8 +82,8 @@ for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. ENTRADA E LÓGICA (TUDO FECHADO CORRETAMENTE)
-prompt = st.chat_input("Diga o que você precisa...")
+# 7. ENTRADA E RESPOSTA
+prompt = st.chat_input("Diga o que você precisa hoje...")
 
 if prompt:
     mensagens_atuais.append({"role": "user", "content": prompt})
@@ -89,37 +91,39 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🧠 Processando..."):
+        with st.spinner("🧠 Processando informações..."):
             try:
-                headers = {
-                    "Authorization": f"Bearer {OPENROUTER_KEY.strip()}",
-                    "Content-Type": "application/json"
-                }
+                resposta_final = ""
                 
-                payload = {
-                    "model": ia_modelo_real,
-                    "messages": [
-                        {"role": "system", "content": "Você é a Chat.IA 2.0 Omni Pro. Mestra absoluta em Roblox e Escola."},
-                        {"role": "user", "content": prompt}
-                    ]
-                }
-
-                response = requests.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers=headers,
-                    data=json.dumps(payload),
-                    timeout=30
-                )
+                # SE FOR GEMINI (VIA GOOGLE AI STUDIO - TOTALMENTE GRÁTIS)
+                if ia_id == "google-pro":
+                    if GOOGLE_CHAVE == "SUA_CHAVE_GOOGLE_AQUI":
+                        st.error("🚨 Coloque a chave do Google AI Studio na linha 40!")
+                        st.stop()
+                    genai.configure(api_key=GOOGLE_CHAVE)
+                    model = genai.GenerativeModel('gemini-1.5-pro')
+                    response = model.generate_content(f"Você é a Chat.IA Omni Pro. Ajude o usuário: {prompt}")
+                    resposta_final = response.text
                 
-                resultado = response.json()
-                
-                if "choices" in resultado:
-                    resposta_ia = resultado["choices"][0]["message"]["content"]
-                    st.write(resposta_ia)
-                    mensagens_atuais.append({"role": "assistant", "content": resposta_ia})
-                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                # SE FOREM AS OUTRAS (VIA OPENROUTER FREE)
                 else:
-                    msg_erro = resultado.get('error', {}).get('message', 'Erro na Key ou Saldo.')
-                    st.error(f"Erro: {msg_erro}")
+                    if OPENROUTER_CHAVE == "SUA_CHAVE_OPENROUTER_AQUI":
+                        st.error("🚨 Coloque a chave do OpenRouter na linha 42!")
+                        st.stop()
+                    headers = {
+                        "Authorization": f"Bearer {OPENROUTER_CHAVE}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": ia_id,
+                        "messages": [{"role": "user", "content": prompt}]
+                    }
+                    response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, data=json.dumps(payload))
+                    resposta_final = response.json()['choices'][0]['message']['content']
+
+                st.write(resposta_final)
+                mensagens_atuais.append({"role": "assistant", "content": resposta_final})
+                st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                
             except Exception as e:
-                st.error(f"Conexão falhou: {e}")
+                st.error(f"Erro na conexão! Verifique as chaves e a internet. Detalhe: {e}")
