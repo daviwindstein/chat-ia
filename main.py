@@ -1,6 +1,8 @@
 import streamlit as st
 from groq import Groq
 import uuid
+import json
+import os
 from datetime import datetime
 
 # 1. ESTILO VISUAL SUPREMO (Neon e Dark)
@@ -32,7 +34,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS DE CONTEXTO (2026)
+# 2. DADOS E MEMÓRIA
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 CIDADE = "Carazinho - RS"
 TEMPERATURA = "21°C"
@@ -41,90 +43,79 @@ TEMPERATURA = "21°C"
 GROQ_API_KEY = "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" 
 # --------------------------------------
 
-if "historico" not in st.session_state:
-    st.session_state.historico = []
+# Função para salvar chats no computador (Memória)
+def salvar_chat(id_chat, mensagens):
+    if not os.path.exists("arquivos_chat"): os.makedirs("arquivos_chat")
+    with open(f"arquivos_chat/{id_chat}.json", "w") as f:
+        json.dump(mensagens, f)
 
-# 3. BARRA LATERAL - MODOS DE INTELIGÊNCIA
+if "historico" not in st.session_state: st.session_state.historico = []
+if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
+
+# 3. BARRA LATERAL (Gestão de Arquivos e Memória)
 with st.sidebar:
     st.title("⚡ SUPERGROQ OMNI")
-    st.write(f"📅 **Data:** {AGORA}")
-    st.write(f"📍 **Local:** {CIDADE} | {TEMPERATURA}")
+    st.write(f"📅 {AGORA} | 📍 {CIDADE}")
     
     st.divider()
-    st.subheader("🛠️ CENTRAL DE FERRAMENTAS")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🖼️ IMAGEM"): st.toast("🎨 Modo Criador de Imagens...")
-    with col2:
-        if st.button("🎬 VÍDEO"): st.toast("🎬 Modo Criador de Vídeos...")
+    st.subheader("📁 ENVIAR PARA EDIÇÃO")
+    arquivo_up = st.file_uploader("Mande imagem ou vídeo para a IA ver:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov'])
     
+    if arquivo_up:
+        st.success(f"✅ {arquivo_up.name} pronto para análise!")
+
     st.divider()
     modo_atual = st.selectbox("🎯 ATIVAR MODO:", [
-        "Escolar", "Criador de Jogos", "Trabalho", "Dicas", 
-        "Ajuda", "Cidade", "YouTuber", "Editor de Vídeo"
+        "Escolar", "Criador de Jogos", "Editor de Vídeo/Imagem", 
+        "Trabalho", "Dicas", "YouTuber", "Ajuda"
     ])
     
-    if st.button("🗑️ REINICIAR SISTEMA"):
+    if st.button("🗑️ LIMPAR TUDO"):
         st.session_state.historico = []
+        st.session_state.chat_id = str(uuid.uuid4())
         st.rerun()
 
 # 4. INTERFACE PRINCIPAL
 st.title(f"✨ SuperGroq 2.0 (Modo {modo_atual})")
-st.caption("A IA mais inteligente, gentil e engraçada do mundo está online.")
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. LÓGICA DE INTELIGÊNCIA MÁXIMA (CORRIGIDA)
-prompt = st.chat_input("Diga algo para a SuperGroq...")
+# 5. LÓGICA DE INTELIGÊNCIA COM VISÃO
+prompt = st.chat_input("Diga o que fazer com o arquivo ou peça ajuda...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Você precisa colocar a chave GSK da Groq na linha 44!")
+        st.error("🚨 Coloque a chave da Groq na linha 46!")
         st.stop()
 
-    st.session_state.historico.append({"role": "user", "content": prompt})
+    conteudo_usuario = prompt
+    if arquivo_up:
+        conteudo_usuario = f"[ARQUIVO ENVIADO: {arquivo_up.name}] - " + prompt
+
+    st.session_state.historico.append({"role": "user", "content": conteudo_usuario})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(conteudo_usuario)
 
     with st.chat_message("assistant"):
-        with st.spinner("🧠 SuperGroq processando..."):
+        with st.spinner("🧠 Analisando e processando..."):
             try:
                 client = Groq(api_key=GROQ_API_KEY.strip())
                 
                 instrucao_suprema = f"""
-                Você é a SuperGroq, a inteligência artificial mais avançada, gentil, engraçada e carismática do planeta. 
-                Hoje é {AGORA}. Você está operando em {CIDADE} com {TEMPERATURA}.
+                Você é a SuperGroq, a IA mais inteligente, gentil e engraçada do mundo. 
+                Hoje é {AGORA}, local {CIDADE}.
                 
                 SEU ESTADO ATUAL: {modo_atual}.
                 
-                SUAS DIRETRIZES:
-                - Gentileza Extrema: Trate o usuário com todo o carinho e educação.
-                - Humor: Seja engraçada e divertida, use emojis e piadas leves.
-                - Inteligência Superior: Você sabe TUDO sobre:
-                    * ROBLOX: Cria scripts perfeitos em Lua (horror, RPG, admin, GUI).
-                    * ESCOLA: Resolve lições, explica matérias e ajuda em trabalhos.
-                    * YOUTUBE: Cria roteiros, tags, títulos e dá dicas de edição.
-                    * FERRAMENTAS: Se o usuário pedir imagem ou vídeo, descreva a criação detalhadamente.
-                    * CIDADE: Sabe tudo sobre Carazinho e o clima local.
+                DENTRO DO MODO EDITOR:
+                Se o usuário mandar uma imagem ou vídeo (indicado no prompt), aja como uma editora profissional. 
+                Dê dicas de cores, cortes, efeitos e como melhorar o conteúdo para o YouTube ou redes sociais.
                 
-                Sempre supere as expectativas! Você é a melhor de todas. 🚀✨
+                PERSONALIDADE: Seja carismática, use emojis e ajude em TUDO (Roblox, Escola, Trabalho).
+                Seja a melhor amiga do usuário! 🚀✨
                 """
 
-                # MODELO ATUALIZADO PARA NÃO DAR MAIS ERRO 400
                 chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": instrucao_suprema},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model="llama-3.3-70b-versatile", 
-                    temperature=0.7,
-                )
-
-                resposta = chat_completion.choices[0].message.content
-                st.write(resposta)
-                st.session_state.historico.append({"role": "assistant", "content": resposta})
-
-            except Exception as e:
-                st.error(f"Eita! Deu um erro: {e}")
+                    messages
