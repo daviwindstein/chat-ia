@@ -35,7 +35,7 @@ st.markdown("""
 # 2. CONFIGURAÇÕES DE 2026
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 # --- COLOQUE SUAS CHAVES AQUI ---
-OPENROUTER_KEY = "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"
+OPENROUTER_KEY = "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"
 GOOGLE_KEY = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ"
 # ------------------------------
 
