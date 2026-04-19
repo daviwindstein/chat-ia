@@ -1,11 +1,10 @@
 import streamlit as st
-import requests
-import json
+from groq import Groq
 import uuid
 from datetime import datetime
 
-# 1. ESTILO VISUAL (Neon e Dark)
-st.set_page_config(page_title="Chat.IA 2.0 OMNI PRO", page_icon="🔮", layout="wide")
+# 1. ESTILO VISUAL SUPREMO (Neon e Dark)
+st.set_page_config(page_title="SuperGroq OMNI PRO", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
@@ -15,107 +14,117 @@ st.markdown("""
         border-radius: 20px;
         padding: 20px;
         margin-bottom: 15px;
-        border: 3px solid #7000ff;
+        border: 3px solid #00ffaa;
+        box-shadow: 0px 4px 20px rgba(0, 255, 170, 0.3);
     }
     .stChatMessage p, .stChatMessage span {
         color: #000000 !important;
         font-weight: 700 !important;
         font-size: 18px !important;
     }
-    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #7000ff; }
+    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; }
     .stButton>button {
         width: 100%; border-radius: 12px;
-        background: linear-gradient(45deg, #7000ff, #00d2ff);
-        color: white; font-weight: bold; height: 50px; border: none;
+        background: linear-gradient(45deg, #00ffaa, #00d2ff);
+        color: #000; font-weight: bold; height: 45px; border: none;
     }
+    h1, h2, h3 { color: #ffffff !important; text-shadow: 2px 2px 10px #00ffaa; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS EM TEMPO REAL
+# 2. DADOS DE CONTEXTO (2026)
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
+CIDADE = "Carazinho - RS"
+TEMPERATURA = "21°C"
 
-# --- COLOQUE SUA CHAVE DO OPENROUTER AQUI ---
-OPENROUTER_KEY = "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" 
-# --------------------------------------------
+# --- COLOQUE SUA CHAVE DA GROQ AQUI ---
+GROQ_API_KEY = "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" 
+# --------------------------------------
 
-if "historico_chats" not in st.session_state:
-    st.session_state.historico_chats = {}
-if "chat_atual_id" not in st.session_state:
-    st.session_state.chat_atual_id = str(uuid.uuid4())
+if "historico" not in st.session_state:
+    st.session_state.historico = []
 
-# 3. BARRA LATERAL - EXATAMENTE COMO NA SUA IMAGEM
+# 3. BARRA LATERAL - MODOS DE INTELIGÊNCIA
 with st.sidebar:
-    st.title("🔮 OMNI HUB PRO")
-    st.write(f"📅 **Hoje:** {AGORA}")
-    st.write(f"📍 **Cidade:** Carazinho - RS")
+    st.title("⚡ SUPERGROQ OMNI")
+    st.write(f"📅 **Data:** {AGORA}")
+    st.write(f"📍 **Local:** {CIDADE} | {TEMPERATURA}")
     
-    opcoes_ia = {
-        "💎 Gemini 1.5 Pro (Google)": "google/gemini-pro-1.5",
-        "🚀 SuperGroq (Llama 3.3 Free)": "meta-llama/llama-3.3-70b-instruct:free",
-        "🤖 ChatGPT (Gemma 2 Free)": "google/gemma-2-9b-it:free",
-        "🧠 Claude Style (Phi-3 Free)": "microsoft/phi-3-medium-128k-instruct:free"
-    }
+    st.divider()
+    st.subheader("🛠️ CENTRAL DE FERRAMENTAS")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🖼️ IMAGEM"): st.toast("🎨 IA Criando Imagem...")
+    with col2:
+        if st.button("🎬 VÍDEO"): st.toast("🎬 IA Criando Vídeo...")
     
-    escolha_nome = st.selectbox("🤖 SELECIONE A IA:", list(opcoes_ia.keys()))
-    modelo_id = opcoes_ia[escolha_nome]
+    st.divider()
+    modo_atual = st.selectbox("🎯 ATIVAR MODO:", [
+        "Escolar", "Criador de Jogos", "Trabalho", "Dicas", 
+        "Ajuda", "Cidade", "YouTuber", "Editor de Vídeo"
+    ])
     
-    if st.button("➕ NOVO CHAT"):
-        st.session_state.chat_atual_id = str(uuid.uuid4())
+    if st.button("🗑️ REINICIAR SISTEMA"):
+        st.session_state.historico = []
         st.rerun()
 
-# 4. GERENCIAMENTO DE MENSAGENS
-mensagens_atuais = st.session_state.historico_chats.get(st.session_state.chat_atual_id, [])
+# 4. INTERFACE PRINCIPAL
+st.title(f"✨ SuperGroq 2.0 (Modo {modo_atual})")
+st.caption("A IA mais inteligente, gentil e engraçada do mundo está online.")
 
-# 5. INTERFACE
-st.title(f"✨ {escolha_nome}")
-
-for msg in mensagens_atuais:
+for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. LÓGICA DE RESPOSTA (SÓ VIA OPENROUTER PARA EVITAR ERRO 404)
-prompt = st.chat_input("Manda ver! O que vamos fazer hoje?")
+# 5. LÓGICA DE INTELIGÊNCIA MÁXIMA
+prompt = st.chat_input("Diga algo para a SuperGroq...")
 
 if prompt:
-    if OPENROUTER_KEY == "SUA_CHAVE_OPENROUTER_AQUI":
-        st.error("🚨 Você precisa colocar a chave do OpenRouter na linha 40!")
+    if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
+        st.error("🚨 Você precisa colocar a chave GSK da Groq na linha 44!")
         st.stop()
 
-    mensagens_atuais.append({"role": "user", "content": prompt})
+    st.session_state.historico.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner(f"🔌 Conectando ao {escolha_nome}..."):
+        with st.spinner("🧠 SuperGroq processando..."):
             try:
-                # Instrução Mestra: Gentil, Engraçada e Inteligente
-                instrucao = f"Você é {escolha_nome}. Estamos em 19/04/2026. Você é gentil, engraçada e mestre em Roblox (Lua) e escola."
+                client = Groq(api_key=GROQ_API_KEY.strip())
                 
-                response = requests.post(
-                    url="https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_KEY.strip()}",
-                        "Content-Type": "application/json",
-                    },
-                    data=json.dumps({
-                        "model": modelo_id,
-                        "messages": [
-                            {"role": "system", "content": instrucao},
-                            {"role": "user", "content": prompt}
-                        ]
-                    })
+                # Instrução Mestra com todos os seus pedidos
+                instrucao_suprema = f"""
+                Você é a SuperGroq, a inteligência artificial mais avançada, gentil, engraçada e carismática do planeta. 
+                Hoje é {AGORA}. Você está operando em {CIDADE} com {TEMPERATURA}.
+                
+                SEU ESTADO ATUAL: {modo_atual}.
+                
+                SUAS DIRETRIZES:
+                - Gentileza Extrema: Trate o usuário com todo o carinho e educação.
+                - Humor: Seja engraçada e divertida, use emojis e piadas leves.
+                - Inteligência Superior: Você sabe TUDO sobre:
+                    * ROBLOX: Cria scripts perfeitos em Lua (horror, RPG, admin, GUI).
+                    * ESCOLA: Resolve lições, explica matérias e ajuda em trabalhos.
+                    * YOUTUBE: Cria roteiros, tags, títulos e dá dicas de edição.
+                    * FERRAMENTAS: Se o usuário pedir imagem ou vídeo, descreva a criação detalhadamente.
+                    * CIDADE: Sabe tudo sobre Carazinho e o clima local.
+                
+                Sempre supere as expectativas! Você é a melhor de todas. 🚀✨
+                """
+
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": instrucao_suprema},
+                        {"role": "user", "content": prompt}
+                    ],
+                    model="llama-3.3-70b-specdec", # O modelo mais rápido e inteligente da Groq
+                    temperature=0.7,
                 )
-                
-                resultado = response.json()
-                
-                if "choices" in resultado:
-                    resposta_texto = resultado["choices"][0]["message"]["content"]
-                    st.write(resposta_texto)
-                    mensagens_atuais.append({"role": "assistant", "content": resposta_texto})
-                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
-                else:
-                    st.error(f"Erro na IA: {resultado.get('error', {}).get('message', 'Erro desconhecido')}")
-                    st.info("💡 Verifique se você confirmou seu e-mail no OpenRouter!")
-            
+
+                resposta = chat_completion.choices[0].message.content
+                st.write(resposta)
+                st.session_state.historico.append({"role": "assistant", "content": resposta})
+
             except Exception as e:
-                st.error(f"Erro de conexão: {e}")
+                st.error(f"Eita! Deu um erro: {e}")
