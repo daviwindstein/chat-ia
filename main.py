@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import json
 import uuid
-import google.generativeai as genai
 from datetime import datetime
 
 # 1. ESTILO VISUAL (Neon e Dark)
@@ -32,88 +31,91 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÕES DE 2026
+# 2. DADOS EM TEMPO REAL
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
-# --- COLOQUE SUAS CHAVES AQUI ---
-OPENROUTER_KEY = "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"
-GOOGLE_KEY = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ"
-# ------------------------------
+
+# --- COLOQUE SUA CHAVE DO OPENROUTER AQUI ---
+OPENROUTER_KEY = "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" 
+# --------------------------------------------
 
 if "historico_chats" not in st.session_state:
     st.session_state.historico_chats = {}
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 3. BARRA LATERAL - IAS DA FOTO
+# 3. BARRA LATERAL - EXATAMENTE COMO NA SUA IMAGEM
 with st.sidebar:
     st.title("🔮 OMNI HUB PRO")
     st.write(f"📅 **Hoje:** {AGORA}")
     st.write(f"📍 **Cidade:** Carazinho - RS")
     
     opcoes_ia = {
-        "🚀 SuperGroq": "meta-llama/llama-3.3-70b-instruct:free",
-        "🤖 ChatGPT Pro": "openai/gpt-4o-mini",
-        "🧠 Claude 3.6 Pro": "anthropic/claude-3-haiku",
-        "💎 Gemini 3.1 Pro": "google/gemini-pro-1.5"
+        "💎 Gemini 1.5 Pro (Google)": "google/gemini-pro-1.5",
+        "🚀 SuperGroq (Llama 3.3 Free)": "meta-llama/llama-3.3-70b-instruct:free",
+        "🤖 ChatGPT (Gemma 2 Free)": "google/gemma-2-9b-it:free",
+        "🧠 Claude Style (Phi-3 Free)": "microsoft/phi-3-medium-128k-instruct:free"
     }
     
-    escolha_nome = st.selectbox("🤖 ESCOLHA SUA IA:", list(opcoes_ia.keys()))
+    escolha_nome = st.selectbox("🤖 SELECIONE A IA:", list(opcoes_ia.keys()))
     modelo_id = opcoes_ia[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
         st.rerun()
 
-# 4. INTERFACE
+# 4. GERENCIAMENTO DE MENSAGENS
 mensagens_atuais = st.session_state.historico_chats.get(st.session_state.chat_atual_id, [])
+
+# 5. INTERFACE
 st.title(f"✨ {escolha_nome}")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 5. LÓGICA DE RESPOSTA SEM ERRO 404
-prompt = st.chat_input("Diga o que você precisa agora...")
+# 6. LÓGICA DE RESPOSTA (SÓ VIA OPENROUTER PARA EVITAR ERRO 404)
+prompt = st.chat_input("Manda ver! O que vamos fazer hoje?")
 
 if prompt:
+    if OPENROUTER_KEY == "SUA_CHAVE_OPENROUTER_AQUI":
+        st.error("🚨 Você precisa colocar a chave do OpenRouter na linha 40!")
+        st.stop()
+
     mensagens_atuais.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🧠 Processando..."):
-            instrucao_mestra = f"Você é {escolha_nome}. Hoje é {AGORA}. Você é gentil, engraçada, mestre em Roblox (Lua) e escola. Local: Carazinho/RS."
-            resposta_final = ""
-            
-            # TENTATIVA 1: OPENROUTER (Para ChatGPT, Claude e SuperGroq)
-            if OPENROUTER_KEY != "SUA_CHAVE_OPENROUTER_AQUI":
-                try:
-                    headers = {"Authorization": f"Bearer {OPENROUTER_KEY.strip()}", "Content-Type": "application/json"}
-                    payload = {
+        with st.spinner(f"🔌 Conectando ao {escolha_nome}..."):
+            try:
+                # Instrução Mestra: Gentil, Engraçada e Inteligente
+                instrucao = f"Você é {escolha_nome}. Estamos em 19/04/2026. Você é gentil, engraçada e mestre em Roblox (Lua) e escola."
+                
+                response = requests.post(
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_KEY.strip()}",
+                        "Content-Type": "application/json",
+                    },
+                    data=json.dumps({
                         "model": modelo_id,
-                        "messages": [{"role": "system", "content": instrucao_mestra}, {"role": "user", "content": prompt}]
-                    }
-                    res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, data=json.dumps(payload), timeout=20)
-                    dados = res.json()
-                    if "choices" in dados:
-                        resposta_final = dados["choices"][0]["message"]["content"]
-                except:
-                    pass
-
-            # TENTATIVA 2: GOOGLE GEMINI (Com correção do erro 404)
-            if not resposta_final and GOOGLE_KEY != "SUA_CHAVE_GOOGLE_AQUI":
-                try:
-                    genai.configure(api_key=GOOGLE_KEY.strip())
-                    # Aqui está a correção: usamos apenas 'gemini-1.5-flash' sem o 'models/'
-                    model = genai.GenerativeModel('gemini-1.5-flash')
-                    res_google = model.generate_content(f"SISTEMA: {instrucao_mestra}\n\nUSUÁRIO: {prompt}")
-                    resposta_final = res_google.text
-                except Exception as e:
-                    resposta_final = f"❌ Erro Técnico: {e}\n\n💡 Verifique se você confirmou o e-mail no OpenRouter!"
-
-            if resposta_final:
-                st.write(resposta_final)
-                mensagens_atuais.append({"role": "assistant", "content": resposta_final})
-                st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
-            else:
-                st.error("Nenhuma IA respondeu. Verifique se colou as chaves corretamente!")
+                        "messages": [
+                            {"role": "system", "content": instrucao},
+                            {"role": "user", "content": prompt}
+                        ]
+                    })
+                )
+                
+                resultado = response.json()
+                
+                if "choices" in resultado:
+                    resposta_texto = resultado["choices"][0]["message"]["content"]
+                    st.write(resposta_texto)
+                    mensagens_atuais.append({"role": "assistant", "content": resposta_texto})
+                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                else:
+                    st.error(f"Erro na IA: {resultado.get('error', {}).get('message', 'Erro desconhecido')}")
+                    st.info("💡 Verifique se você confirmou seu e-mail no OpenRouter!")
+            
+            except Exception as e:
+                st.error(f"Erro de conexão: {e}")
