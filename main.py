@@ -42,23 +42,23 @@ if "historico_chats" not in st.session_state:
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL - NOMES DAS IAS QUE VOCÊ PEDIU
+# 4. BARRA LATERAL - NOMES DAS IAS DA FOTO
 with st.sidebar:
     st.title("🔮 OMNI HUB 2026")
     st.write(f"📅 **Hoje:** {AGORA}")
     
-    # Nomes dos modelos corrigidos para evitar o erro 404
+    # Nomes simplificados para não dar erro 404
     opcoes_ia = {
-        "🚀 SuperGroq": "gemini-1.5-flash-latest",
-        "💎 Gemini 3.1 Pro": "gemini-1.5-pro-latest",
-        "🤖 ChatGPT Pro": "gemini-1.5-pro-latest",
-        "🧠 Claude 3.6 Pro": "gemini-1.5-pro-latest"
+        "🚀 SuperGroq": "gemini-1.5-flash",
+        "💎 Gemini 3.1 Pro": "gemini-1.5-pro",
+        "🤖 ChatGPT Pro": "gemini-1.5-pro",
+        "🧠 Claude 3.6 Pro": "gemini-1.5-pro"
     }
     
     instrucoes = {
         "🚀 SuperGroq": "Você é o SuperGroq. Responda muito rápido e seja técnico.",
         "💎 Gemini 3.1 Pro": "Você é o Gemini 3.1 Pro. Foco em lógica superior.",
-        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro. Seja criativo e detalhista.",
+        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro. Seja muito criativo e detalhista.",
         "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Mestre em Roblox (Lua) e redação."
     }
     
@@ -88,12 +88,12 @@ for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. LÓGICA DE RESPOSTA CORRIGIDA
+# 7. LÓGICA DE RESPOSTA (SEM PREFIXO MODELS/ PARA TESTAR)
 prompt = st.chat_input("Como posso te ajudar agora?")
 
 if prompt:
     if GOOGLE_CHAVE == "SUA_CHAVE_AQUI":
-        st.error("🚨 Coloque a chave na linha 44!")
+        st.error("🚨 Coloque a chave na linha 40!")
         st.stop()
 
     genai.configure(api_key=GOOGLE_CHAVE.strip())
@@ -105,9 +105,9 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner(f"🧠 {escolha_nome} conectando..."):
             try:
-                # O segredo aqui é o 'models/' antes do nome para algumas versões
+                # TENTATIVA 1: Nome direto (mais comum de funcionar)
                 model = genai.GenerativeModel(
-                    model_name=f"models/{modelo_id}",
+                    model_name=modelo_id,
                     system_instruction=f"Você é a Chat.IA Omni Pro. Hoje é {AGORA}. {personalidade} Mestra em Roblox e Escola. Gentil e engraçada.",
                     safety_settings=[
                         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -125,11 +125,13 @@ if prompt:
                     st.warning("IA não respondeu. Tente novamente!")
             
             except Exception as e:
-                # Se falhar com 'models/', tenta sem o prefixo automaticamente
+                # TENTATIVA 2: Se a primeira falhar, tenta com o prefixo 'models/'
                 try:
-                    model = genai.GenerativeModel(model_name=modelo_id)
+                    model = genai.GenerativeModel(model_name=f"models/{modelo_id}")
                     response = model.generate_content(prompt)
                     st.write(response.text)
                     mensagens_atuais.append({"role": "assistant", "content": response.text})
-                except:
-                    st.error(f"Erro persistente: {e}")
+                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                except Exception as e2:
+                    st.error(f"Erro Crítico: O Google não reconheceu o modelo {modelo_id}. Verifique se sua chave API no AI Studio tem acesso ao Gemini 1.5.")
+                    st.info(f"Detalhe técnico: {e2}")
