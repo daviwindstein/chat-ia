@@ -1,9 +1,10 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
+import json
 import uuid
 from datetime import datetime
 
-# 1. ESTILO VISUAL (Neon e Dark)
+# 1. ESTILO VISUAL (Neon, Dark e Pro)
 st.set_page_config(page_title="Chat.IA 2.0 OMNI PRO", page_icon="🔮", layout="wide")
 
 st.markdown("""
@@ -33,29 +34,29 @@ st.markdown("""
 # 2. DADOS EM TEMPO REAL
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 
-# --- COLOQUE SUA CHAVE AQUI ---
-GOOGLE_CHAVE = "AIzaSyC08xg4y75-DjrGQQWh2Ib6WP19Krlx4VU" 
-# ------------------------------
+# --- COLOQUE SUA CHAVE DO OPENROUTER AQUI ---
+OPENROUTER_KEY = "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" 
+# --------------------------------------------
 
 if "historico_chats" not in st.session_state:
     st.session_state.historico_chats = {}
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL - IAS DA FOTO (Usando o motor Flash que não dá erro)
+# 3. BARRA LATERAL - AS IAS QUE VOCÊ PEDIU (Modelos reais)
 with st.sidebar:
-    st.title("🔮 OMNI HUB 2026")
+    st.title("🔮 OMNI HUB PRO")
     st.write(f"📅 **Hoje:** {AGORA}")
     
     opcoes_ia = {
-        "🚀 SuperGroq": "Você é o SuperGroq. Seja ultra rápido e técnico.",
-        "💎 Gemini 3.1 Pro": "Você é o Gemini 1.5 Pro. Seja lógico e brilhante.",
-        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro. Seja criativo e amigável.",
-        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Seja mestre em Lua e escrita."
+        "🚀 SuperGroq": "meta-llama/llama-3.3-70b-instruct:free",
+        "🤖 ChatGPT Pro": "openai/gpt-4o",
+        "🧠 Claude 3.6 Pro": "anthropic/claude-3.5-sonnet",
+        "💎 Gemini 3.1 Pro": "google/gemini-pro-1.5"
     }
     
     escolha_nome = st.selectbox("🤖 SELECIONE A IA:", list(opcoes_ia.keys()))
-    personalidade = opcoes_ia[escolha_nome]
+    modelo_id = opcoes_ia[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
@@ -69,52 +70,60 @@ with st.sidebar:
             st.session_state.chat_atual_id = cid
             st.rerun()
 
-# 5. GERENCIAMENTO DE MENSAGENS
+# 4. GERENCIAMENTO DE MENSAGENS
 mensagens_atuais = st.session_state.historico_chats.get(st.session_state.chat_atual_id, [])
 
-# 6. INTERFACE
+# 5. INTERFACE
 st.title(f"✨ {escolha_nome}")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. LÓGICA DE RESPOSTA (USANDO GEMINI-1.5-FLASH PARA EVITAR 404)
-prompt = st.chat_input("Diga o que você precisa agora...")
+# 6. LÓGICA DE RESPOSTA (CONECTANDO A TODAS AS IAS)
+prompt = st.chat_input("Comande sua IA de 2026...")
 
 if prompt:
-    if GOOGLE_CHAVE == "SUA_CHAVE_AQUI":
-        st.error("🚨 Mano, coloca a chave na linha 40!")
+    if OPENROUTER_KEY == "SUA_CHAVE_OPENROUTER_AQUI":
+        st.error("🚨 Você precisa da chave do OpenRouter na linha 40!")
         st.stop()
 
-    genai.configure(api_key=GOOGLE_CHAVE.strip())
-    
     mensagens_atuais.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner(f"🧠 {escolha_nome} conectando..."):
+        with st.spinner(f"🔌 Conectando ao cérebro do {escolha_nome}..."):
             try:
-                # O segredo: 'gemini-1.5-flash' é o mais estável e aceita tudo
-                model = genai.GenerativeModel(
-                    model_name='gemini-1.5-flash',
-                    system_instruction=f"Você é a Chat.IA Omni Pro. Hoje é {AGORA}. {personalidade} Mestra em Roblox e Escola. Gentil e engraçada.",
-                    safety_settings=[
-                        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
-                    ]
+                # Instrução Mestra
+                instrucao = f"Você é a Chat.IA Omni Pro, agindo como {escolha_nome}. Hoje é {AGORA}. Você é gentil, engraçada e mestre em Roblox (Lua) e escola."
+                
+                response = requests.post(
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_KEY.strip()}",
+                        "Content-Type": "application/json",
+                    },
+                    data=json.dumps({
+                        "model": modelo_id,
+                        "messages": [
+                            {"role": "system", "content": instrução},
+                            {"role": "user", "content": prompt}
+                        ]
+                    })
                 )
                 
-                response = model.generate_content(prompt)
+                resultado = response.json()
                 
-                if response.text:
-                    st.write(response.text)
-                    mensagens_atuais.append({"role": "assistant", "content": response.text})
+                if "choices" in resultado:
+                    resposta_texto = resultado["choices"][0]["message"]["content"]
+                    st.write(resposta_texto)
+                    mensagens_atuais.append({"role": "assistant", "content": resposta_texto})
                     st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
                 else:
-                    st.warning("IA não respondeu. Tente de novo! 😅")
+                    erro_msg = resultado.get('error', {}).get('message', 'Erro desconhecido')
+                    st.error(f"Erro na IA: {erro_msg}")
+                    st.info("Dica: Alguns modelos Pro exigem saldo no OpenRouter. Tente o SuperGroq (que é Free) para testar!")
             
             except Exception as e:
-                st.error(f"Erro ao falar com a IA: {e}")
-                st.info("💡 Se o erro 404 persistir, tente criar uma NOVA chave no AI Studio.")
+                st.error(f"Erro de conexão: {e}")
