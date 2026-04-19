@@ -98,7 +98,7 @@ if prompt:
         st.error("🚨 Mano, você esqueceu de colocar a chave do Google AI Studio na linha 42!")
         st.stop()
 
-    genai.configure(api_key=GOOGLE_CHAVE)
+    genai.configure(api_key=GOOGLE_CHAVE.strip())
     
     # Instrução Mestra: Sabe tudo e é gente fina!
     PROMPT_MESTRE = f"""
