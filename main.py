@@ -31,7 +31,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. CHAVE DO OPENROUTER
-OPENROUTER_KEY = "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"
+OPENROUTER_KEY = "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"
 
 # 3. MEMÓRIA DO SISTEMA
 if "historico_chats" not in st.session_state:
