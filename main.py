@@ -1,9 +1,10 @@
 import streamlit as st
 from groq import Groq
+import google.generativeai as genai
 import uuid
 
-# 1. ESTILO VISUAL (Omni-Inteligência: Roxo e Preto)
-st.set_page_config(page_title="Chat.IA 2.0 Omni", page_icon="🌐", layout="wide")
+# 1. ESTILO VISUAL (Preto, Roxo e Neon)
+st.set_page_config(page_title="Chat.IA 2.0 HUB", page_icon="🧠", layout="wide")
 
 st.markdown("""
     <style>
@@ -29,85 +30,89 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. SISTEMA DE MEMÓRIA DE CHATS
+# 2. MEMÓRIA E CHAVES (Substitua pelas suas)
 if "historico_chats" not in st.session_state:
     st.session_state.historico_chats = {}
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 3. CONFIGURAÇÃO DA CHAVE
-CHAVE_GROQ = "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" 
+# --- COLOQUE SUAS CHAVES AQUI ---
+KEY_GROQ = "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"
+KEY_GEMINI = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ"
+# -------------------------------
 
-if CHAVE_GROQ == "SUA_CHAVE_AQUI":
-    st.error("🚨 Coloque a Chave da Groq na linha 52!")
-    st.stop()
-
-client = Groq(api_key=CHAVE_GROQ)
-
-# 4. BARRA LATERAL
+# 3. BARRA LATERAL COM SELETOR DE IA
 with st.sidebar:
-    st.title("🌐 Chat.IA Omni")
+    st.title("🚀 Hub Chat.IA 2.0")
+    
+    # BOTAO PARA ESCOLHER A IA
+    ia_escolhida = st.selectbox(
+        "ESCOLHA O CÉREBRO DA IA:",
+        ["SuperGroq (Llama 3.3)", "Gemini Pro 1.5", "ChatGPT-4 (via Groq)", "Claude 3 (via Groq)"]
+    )
+    
+    st.divider()
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
         st.rerun()
 
     st.divider()
-    st.subheader("📁 Chats Recentes")
+    st.subheader("📁 Histórico")
     for cid in list(st.session_state.historico_chats.keys()):
-        conteudo = st.session_state.historico_chats[cid]
-        label = conteudo[0]["content"][:15] if conteudo else "Chat Vazio"
+        label = st.session_state.historico_chats[cid][0]["content"][:15] if st.session_state.historico_chats[cid] else "Vazio"
         if st.button(f"💬 {label}...", key=cid):
             st.session_state.chat_atual_id = cid
             st.rerun()
 
-    st.divider()
-    st.subheader("🚀 Super Poderes")
-    if st.button("🖼️ Prompt de Imagem"): st.info("Descreva a cena no chat!")
-    if st.button("📚 Ajudante Escolar"): st.success("Modo Prova Ativado!")
-    if st.button("🎮 Roblox Script"): st.warning("Mestre em Lua Ativo!")
-
-# 5. GERENCIAMENTO DO CHAT ATUAL
+# 4. GERENCIAMENTO DE MENSAGENS
 if st.session_state.chat_atual_id not in st.session_state.historico_chats:
     st.session_state.historico_chats[st.session_state.chat_atual_id] = []
 
 mensagens_atuais = st.session_state.historico_chats[st.session_state.chat_atual_id]
 
-# 6. INTERFACE
-st.title("⚡ Chat.IA 2.0 Omni")
+# 5. INTERFACE
+st.title(f"⚡ Chat.IA 2.0: {ia_escolhida}")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. ENTRADA E RESPOSTA (CORRIGIDO)
-prompt = st.chat_input("Como posso te ajudar?")
+# 6. LÓGICA DE RESPOSTA MULTI-MODELO
+prompt = st.chat_input("Pergunte qualquer coisa...")
 
 if prompt:
-    # Adiciona e mostra a mensagem do usuário
     mensagens_atuais.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Gera e mostra a resposta da IA
     with st.chat_message("assistant"):
-        with st.spinner("🧠 Pensando..."):
+        with st.spinner(f"🧠 {ia_escolhida} processando..."):
             try:
-                treino = "Você é a Chat.IA 2.0 Omni, mestre em Roblox, Escola e Automação."
-                
-                completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": treino},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model="llama-3.3-70b-versatile",
-                )
-                
-                resposta = completion.choices[0].message.content
+                resposta = ""
+                treino = "Você é a Chat.IA 2.0, mestre em Roblox, escola e tecnologia."
+
+                # LÓGICA PARA GROQ (SuperGroq e outros)
+                if "Groq" in ia_escolhida or "Chat" in ia_escolhida:
+                    client = Groq(api_key=KEY_GROQ)
+                    # Escolhe o modelo interno da Groq
+                    modelo_ref = "llama-3.3-70b-versatile"
+                    
+                    completion = client.chat.completions.create(
+                        messages=[{"role": "system", "content": treino}, {"role": "user", "content": prompt}],
+                        model=modelo_ref,
+                    )
+                    resposta = completion.choices[0].message.content
+
+                # LÓGICA PARA GEMINI
+                elif "Gemini" in ia_escolhida:
+                    genai.configure(api_key=KEY_GEMINI)
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    response = model.generate_content(f"{treino} Pergunta: {prompt}")
+                    resposta = response.text
+
                 st.write(resposta)
-                
-                # Salva a resposta no histórico
                 mensagens_atuais.append({"role": "assistant", "content": resposta})
                 st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
                 
             except Exception as e:
-                st.error(f"Erro: {e}")
+                st.error(f"Erro na conexão: {e}")
