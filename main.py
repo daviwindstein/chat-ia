@@ -1,10 +1,10 @@
 import streamlit as st
-from groq import Groq
-import google.generativeai as genai
+import requests
+import json
 import uuid
 
-# 1. ESTILO VISUAL (Preto, Roxo e Neon)
-st.set_page_config(page_title="Chat.IA 2.0 HUB", page_icon="🧠", layout="wide")
+# 1. ESTILO VISUAL (Preto Absoluto e Neon Roxo/Ciano)
+st.set_page_config(page_title="Chat.IA 2.0 OMNI", page_icon="🔮", layout="wide")
 
 st.markdown("""
     <style>
@@ -30,55 +30,59 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. MEMÓRIA E CHAVES (Substitua pelas suas)
+# 2. CONFIGURAÇÃO DE CHAVES
+# Coloca aqui a chave que criaste no OpenRouter
+OPENROUTER_KEY = "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"
+
+# 3. MEMÓRIA DO SISTEMA
 if "historico_chats" not in st.session_state:
     st.session_state.historico_chats = {}
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# --- COLOQUE SUAS CHAVES AQUI ---
-KEY_GROQ = "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"
-KEY_GEMINI = "AIzaSyAineHU804nh7p2uexc7nhTxRpwQDC49IQ"
-# -------------------------------
-
-# 3. BARRA LATERAL COM SELETOR DE IA
+# 4. BARRA LATERAL - SELETOR DE CÉREBRO
 with st.sidebar:
-    st.title("🚀 Hub Chat.IA 2.0")
+    st.title("🔮 OMNI HUB IA")
     
-    # BOTAO PARA ESCOLHER A IA
-    ia_escolhida = st.selectbox(
-        "ESCOLHA O CÉREBRO DA IA:",
-        ["SuperGroq (Llama 3.3)", "Gemini Pro 1.5", "ChatGPT-4 (via Groq)", "Claude 3 (via Groq)"]
+    # Lista das melhores IAs do mundo disponíveis no OpenRouter
+    ia_modelo = st.selectbox(
+        "ESCOLHA A IA (VERSÕES PRO):",
+        [
+            "openai/gpt-4o", 
+            "anthropic/claude-3.5-sonnet", 
+            "google/gemini-pro-1.5", 
+            "meta-llama/llama-3.1-405b",
+            "mistralai/mistral-large"
+        ]
     )
     
-    st.divider()
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
         st.rerun()
 
     st.divider()
-    st.subheader("📁 Histórico")
+    st.subheader("📁 Conversas Guardadas")
     for cid in list(st.session_state.historico_chats.keys()):
-        label = st.session_state.historico_chats[cid][0]["content"][:15] if st.session_state.historico_chats[cid] else "Vazio"
+        label = st.session_state.historico_chats[cid][0]["content"][:18] if st.session_state.historico_chats[cid] else "Vazio"
         if st.button(f"💬 {label}...", key=cid):
             st.session_state.chat_atual_id = cid
             st.rerun()
 
-# 4. GERENCIAMENTO DE MENSAGENS
+# 5. GERENCIAMENTO DE MENSAGENS
 if st.session_state.chat_atual_id not in st.session_state.historico_chats:
     st.session_state.historico_chats[st.session_state.chat_atual_id] = []
 
 mensagens_atuais = st.session_state.historico_chats[st.session_state.chat_atual_id]
 
-# 5. INTERFACE
-st.title(f"⚡ Chat.IA 2.0: {ia_escolhida}")
+# 6. INTERFACE PRINCIPAL
+st.title(f"🚀 Chat.IA 2.0: {ia_modelo.split('/')[-1].upper()}")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 6. LÓGICA DE RESPOSTA MULTI-MODELO
-prompt = st.chat_input("Pergunte qualquer coisa...")
+# 7. LÓGICA DE CHAMADA VIA OPENROUTER
+prompt = st.chat_input("Diz-me o que queres criar ou estudar...")
 
 if prompt:
     mensagens_atuais.append({"role": "user", "content": prompt})
@@ -86,33 +90,33 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner(f"🧠 {ia_escolhida} processando..."):
+        with st.spinner(f"🧠 {ia_modelo} está a pensar..."):
             try:
-                resposta = ""
-                treino = "Você é a Chat.IA 2.0, mestre em Roblox, escola e tecnologia."
-
-                # LÓGICA PARA GROQ (SuperGroq e outros)
-                if "Groq" in ia_escolhida or "Chat" in ia_escolhida:
-                    client = Groq(api_key=KEY_GROQ)
-                    # Escolhe o modelo interno da Groq
-                    modelo_ref = "llama-3.3-70b-versatile"
-                    
-                    completion = client.chat.completions.create(
-                        messages=[{"role": "system", "content": treino}, {"role": "user", "content": prompt}],
-                        model=modelo_ref,
-                    )
-                    resposta = completion.choices[0].message.content
-
-                # LÓGICA PARA GEMINI
-                elif "Gemini" in ia_escolhida:
-                    genai.configure(api_key=KEY_GEMINI)
-                    model = genai.GenerativeModel('gemini-1.5-flash')
-                    response = model.generate_content(f"{treino} Pergunta: {prompt}")
-                    resposta = response.text
-
-                st.write(resposta)
-                mensagens_atuais.append({"role": "assistant", "content": resposta})
-                st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                # Chamada para a API do OpenRouter
+                response = requests.post(
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    data=json.dumps({
+                        "model": ia_modelo,
+                        "messages": [
+                            {"role": "system", "content": "És a Chat.IA 2.0 Omni. Mestra em Roblox, Escola e Automação."},
+                            {"role": "user", "content": prompt}
+                        ]
+                    })
+                )
+                
+                dados = response.json()
+                # Extrai a resposta correta do JSON do OpenRouter
+                if "choices" in dados:
+                    resposta = dados["choices"][0]["message"]["content"]
+                    st.write(resposta)
+                    mensagens_atuais.append({"role": "assistant", "content": resposta})
+                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                else:
+                    st.error(f"Erro na API: {dados}")
                 
             except Exception as e:
-                st.error(f"Erro na conexão: {e}")
+                st.error(f"Falha na conexão: {e}")
