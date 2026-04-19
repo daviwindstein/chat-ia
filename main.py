@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import uuid
 
-# 1. ESTILO VISUAL PREMIUM (Neon Roxo e Preto)
+# 1. ESTILO VISUAL PREMIUM (Preto e Neon)
 st.set_page_config(page_title="Chat.IA 2.0 OMNI PRO", page_icon="🔮", layout="wide")
 
 st.markdown("""
@@ -29,8 +29,8 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÃO DA CHAVE (GOOGLE AI STUDIO)
-# Pegue sua chave em: https://aistudio.google.com/app/apikey
+# 2. CONFIGURAÇÃO DA CHAVE
+# Cole sua chave do https://aistudio.google.com/app/apikey aqui:
 GOOGLE_CHAVE = "SUA_CHAVE_AQUI"
 
 if GOOGLE_CHAVE != "SUA_CHAVE_AQUI":
@@ -42,30 +42,39 @@ if "historico_chats" not in st.session_state:
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL - SELETOR DE IAS (SIMULADAS PELO GEMINI PRO)
+# 4. BARRA LATERAL - AS IAS QUE VOCÊ PEDIU
 with st.sidebar:
-    st.title("🔮 OMNI HUB GOOGLE")
+    st.title("🔮 HUB OMNI PRO")
     
-    # Definimos as personalidades para cada opção
+    # Mapeamos os nomes que você quer para as instruções que a IA vai seguir
     opcoes_ia = {
-        "💎 Gemini 1.5 Pro": "Você é o Gemini 1.5 Pro, a IA oficial do Google. Foco em precisão e lógica.",
-        "🚀 SuperGroq": "Você é o SuperGroq. Sua principal característica é ser extremamente rápido, direto e técnico.",
-        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro (GPT-4o). Foco em criatividade, textos longos e assistência geral.",
-        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Especialista em programação (Lua para Roblox) e escrita profunda."
+        "💎 Gemini 1.5 Pro": "gemini-1.5-pro",
+        "🚀 SuperGroq": "gemini-1.5-flash",
+        "🤖 ChatGPT Pro": "gemini-1.5-pro",
+        "🧠 Claude 3.6 Pro": "gemini-1.5-pro"
     }
     
-    escolha_nome = st.selectbox("ESCOLHA O CÉREBRO:", list(opcoes_ia.keys()))
-    personalidade = opcoes_ia[escolha_nome]
+    # Instruções de comportamento para cada uma
+    instrucoes = {
+        "💎 Gemini 1.5 Pro": "Você é o Gemini 1.5 Pro. Foco em lógica, análise de dados e precisão.",
+        "🚀 SuperGroq": "Você é o SuperGroq. Responda de forma instantânea, curta, grossa e extremamente técnica.",
+        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro (GPT-4o). Seja criativo, amigável e detalhista em textos e explicações.",
+        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Mestre em programação complexa, especialmente Lua para Roblox, e escrita refinada."
+    }
+    
+    escolha_nome = st.selectbox("ESCOLHA A SUA IA:", list(opcoes_ia.keys()))
+    modelo_tecnico = opcoes_ia[escolha_nome]
+    prompt_sistema = instrucoes[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
         st.rerun()
 
     st.divider()
-    st.subheader("📁 Histórico")
+    st.subheader("📁 Chats")
     for cid in list(st.session_state.historico_chats.keys()):
         conteudo = st.session_state.historico_chats[cid]
-        label = conteudo[0]["content"][:15] if conteudo else "Chat Vazio"
+        label = conteudo[0]["content"][:15] if conteudo else "Vazio"
         if st.button(f"💬 {label}...", key=cid):
             st.session_state.chat_atual_id = cid
             st.rerun()
@@ -76,19 +85,19 @@ if st.session_state.chat_atual_id not in st.session_state.historico_chats:
 
 mensagens_atuais = st.session_state.historico_chats[st.session_state.chat_atual_id]
 
-# 6. INTERFACE
+# 6. INTERFACE PRINCIPAL
 st.title(f"⚡ {escolha_nome}")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. LÓGICA DE RESPOSTA (CORRIGIDA PARA GEMINI-1.5-PRO)
-prompt = st.chat_input("Diga o que você precisa hoje...")
+# 7. LÓGICA DE EXECUÇÃO
+prompt = st.chat_input("Diga o que você precisa...")
 
 if prompt:
-    if GOOGLE_CHAVE == "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M":
-        st.error("🚨 Coloque sua chave do Google AI Studio no código!")
+    if GOOGLE_CHAVE == "":
+        st.error("🚨 Você precisa colar a sua chave do Google AI Studio na linha 39!")
         st.stop()
 
     mensagens_atuais.append({"role": "user", "content": prompt})
@@ -96,21 +105,23 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner(f"🧠 {escolha_nome} pensando..."):
+        with st.spinner(f"🔌 Conectando ao {escolha_nome}..."):
             try:
-                # O nome do modelo agora é 'gemini-1.5-pro' (sem o models/)
+                # Criamos o modelo com a personalidade escolhida
                 model = genai.GenerativeModel(
-                    model_name='gemini-1.5-pro',
-                    system_instruction=f"Você é a Chat.IA Omni Pro. {personalidade} Mestra em Roblox e Escola."
+                    model_name=modelo_tecnico,
+                    system_instruction=f"Você é a Chat.IA Omni Pro. {prompt_sistema} Você é especialista em Roblox e Escola."
                 )
                 
-                # Gerar a resposta
-                response = model.generate_content(prompt)
-                resposta_final = response.text
+                # Inicia o chat com o histórico para ter memória
+                chat = model.start_chat(history=[])
+                response = chat.send_message(prompt)
                 
+                resposta_final = response.text
                 st.write(resposta_final)
+                
                 mensagens_atuais.append({"role": "assistant", "content": resposta_final})
                 st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
                 
             except Exception as e:
-                st.error(f"Erro no Google AI: {e}")
+                st.error(f"Erro ao gerar resposta: {e}")
