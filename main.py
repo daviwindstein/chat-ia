@@ -36,7 +36,7 @@ st.markdown("""
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
 
 # --- COLE SUA CHAVE ABAIXO NA LINHA 44 ---
-GOOGLE_CHAVE = "SUA_CHAVE_AQUI" 
+GOOGLE_CHAVE = "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M" 
 # ----------------------------------------
 
 # 3. MEMÓRIA DO SISTEMA
@@ -99,7 +99,7 @@ prompt = st.chat_input("Comande a sua IA...")
 
 if prompt:
     # Verificação da Chave
-    if GOOGLE_CHAVE == "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M" or len(GOOGLE_CHAVE) < 10:
+    if GOOGLE_CHAVE == "SUA_CHAVE_AQUI" or len(GOOGLE_CHAVE) < 10:
         st.error("🚨 CHAVE INVÁLIDA! Cole sua chave do AI Studio na linha 44.")
         st.stop()
 
