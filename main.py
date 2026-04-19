@@ -3,7 +3,7 @@ import google.generativeai as genai
 import uuid
 from datetime import datetime
 
-# 1. ESTILO VISUAL (Neon, Dark e Fácil de Usar)
+# 1. ESTILO VISUAL (Neon, Dark e Leitura Fácil)
 st.set_page_config(page_title="Chat.IA 2.0 OMNI PRO", page_icon="🔮", layout="wide")
 
 st.markdown("""
@@ -15,7 +15,6 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 15px;
         border: 3px solid #7000ff;
-        box-shadow: 0px 5px 15px rgba(112, 0, 255, 0.4);
     }
     .stChatMessage p, .stChatMessage span {
         color: #000000 !important;
@@ -26,16 +25,15 @@ st.markdown("""
     .stButton>button {
         width: 100%; border-radius: 12px;
         background: linear-gradient(45deg, #7000ff, #00d2ff);
-        color: white; font-weight: bold; height: 55px; border: none;
+        color: white; font-weight: bold; height: 50px; border: none;
     }
-    .stChatInputContainer { padding-bottom: 20px; }
+    h1 { color: #ffffff !important; text-shadow: 2px 2px 10px #7000ff; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. CONFIGURAÇÃO DA CHAVE E DADOS EM TEMPO REAL
+# 2. CONFIGURAÇÃO DA CHAVE E DADOS REAIS
 GOOGLE_CHAVE = "SUA_CHAVE_AQUI"
 AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
-CIDADE = "Brasil" # Você pode mudar para sua cidade específica
 
 # 3. MEMÓRIA
 if "historico_chats" not in st.session_state:
@@ -43,27 +41,35 @@ if "historico_chats" not in st.session_state:
 if "chat_atual_id" not in st.session_state:
     st.session_state.chat_atual_id = str(uuid.uuid4())
 
-# 4. BARRA LATERAL
+# 4. BARRA LATERAL - AS IAS QUE VOCÊ PEDIU
 with st.sidebar:
-    st.title("🔮 OMNI HUB SUPREMO")
+    st.title("🔮 OMNI HUB PRO")
     st.write(f"📅 **Hoje:** {AGORA}")
     
     opcoes_ia = {
-        "💎 Gemini 3.1 Pro": "gemini-1.5-pro",
         "🚀 SuperGroq": "gemini-1.5-flash",
+        "💎 Gemini 3.1 Pro": "gemini-1.5-pro",
         "🤖 ChatGPT Pro": "gemini-1.5-pro",
         "🧠 Claude 3.6 Pro": "gemini-1.5-pro"
     }
     
+    instrucoes = {
+        "🚀 SuperGroq": "Você é o SuperGroq. Responda na velocidade da luz, de forma curta e técnica.",
+        "💎 Gemini 3.1 Pro": "Você é o Gemini 3.1 Pro. Foco total em inteligência superior e lógica.",
+        "🤖 ChatGPT Pro": "Você é o ChatGPT Pro (GPT-4o). Seja criativo, detalhista e muito amigável.",
+        "🧠 Claude 3.6 Pro": "Você é o Claude 3.6 Pro. Especialista em scripts Lua para Roblox e redações perfeitas."
+    }
+    
     escolha_nome = st.selectbox("🤖 ESCOLHA SUA IA:", list(opcoes_ia.keys()))
     modelo_tecnico = opcoes_ia[escolha_nome]
+    prompt_personalidade = instrucoes[escolha_nome]
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_atual_id = str(uuid.uuid4())
         st.rerun()
 
     st.divider()
-    st.subheader("📁 Conversas")
+    st.subheader("📁 Meus Chats")
     for cid in list(st.session_state.historico_chats.keys()):
         conteudo = st.session_state.historico_chats[cid]
         label = conteudo[0]["content"][:15] if conteudo else "Chat Vazio"
@@ -79,34 +85,32 @@ mensagens_atuais = st.session_state.historico_chats[st.session_state.chat_atual_
 
 # 6. INTERFACE
 st.title(f"✨ {escolha_nome}")
-st.write(f"Opa! Sou sua IA assistente. Estou pronta para criar scripts de Roblox, ajudar nos estudos ou só bater um papo engraçado! 🚀")
 
 for msg in mensagens_atuais:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# 7. LÓGICA DE RESPOSTA (MUITO GENTIL E INTELIGENTE)
-prompt = st.chat_input("Manda ver! O que vamos fazer hoje?")
+# 7. LÓGICA DE RESPOSTA (RESISTENTE A ERROS)
+prompt = st.chat_input("O que vamos criar hoje?")
 
 if prompt:
     if GOOGLE_CHAVE == "AIzaSyD04qcTm5fX2ZrMvcsiFrvXUTXu4KiyO4M":
-        st.error("🚨 Mano, esqueceu a chave! Coloca ela na linha 42.")
+        st.error("🚨 Mano, você esqueceu de colocar a chave do Google AI Studio na linha 42!")
         st.stop()
 
     genai.configure(api_key=GOOGLE_CHAVE)
     
-    # Instrução Mestra: Gentil, Engraçada, Inteligente e Sabichona
+    # Instrução Mestra: Sabe tudo e é gente fina!
     PROMPT_MESTRE = f"""
-    Você é a Chat.IA 2.0 Omni Pro. 
-    Hoje é dia {AGORA} em {CIDADE}. 
+    Você é a Chat.IA 2.0 Omni Pro. Hoje é dia {AGORA}.
     
-    PERSONALIDADE: Muito gentil, engraçada (pode fazer piadas leves), inteligente e prestativa. 
-    HABILIDADES: 
-    1. Mestra em Roblox (Lua): Cria scripts perfeitos para RPGs, terror e sistemas.
-    2. Professora nota 10: Explica lição de casa de um jeito fácil e rápido.
-    3. Atualizada: Sabe que estamos em 2026.
+    Sua missão: Ser a IA mais inteligente, gentil e engraçada do mundo!
+    - Especialista em Roblox: Cria scripts perfeitos em Lua (especialmente para jogos de terror e RPG).
+    - Mestra na Escola: Ajuda em trabalhos, lições e explica tudo de um jeito fácil.
+    - Conectada: Sabe que estamos em 2026.
     
-    Seja amigável como um melhor amigo programador!
+    Estilo de resposta: {prompt_personalidade}
+    Lembre-se de ser sempre gentil e prestativa!
     """
 
     mensagens_atuais.append({"role": "user", "content": prompt})
@@ -114,7 +118,7 @@ if prompt:
         st.write(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("🔮 Consultando os astros (e o código)..."):
+        with st.spinner(f"🧠 {escolha_nome} está processando..."):
             try:
                 model = genai.GenerativeModel(
                     model_name=modelo_tecnico,
@@ -128,4 +132,12 @@ if prompt:
                 response = model.generate_content(prompt)
                 
                 if response.text:
-                    st
+                    st.write(response.text)
+                    mensagens_atuais.append({"role": "assistant", "content": response.text})
+                    st.session_state.historico_chats[st.session_state.chat_atual_id] = mensagens_atuais
+                else:
+                    st.warning("Eita, não consegui pensar em nada agora. Tenta de novo? 😅")
+            
+            except Exception as e:
+                st.error(f"Erro ao falar com a IA: {e}")
+                st.info("💡 Dica: Verifique se sua internet está ok ou se sua chave API é válida.")
