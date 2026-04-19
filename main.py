@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 
-# 1. ESTILO VISUAL (Neon, Dark e Profissional)
+# 1. ESTILO VISUAL SUPREMO (Neon e Dark)
 st.set_page_config(page_title="SuperGroq OMNI 2026", page_icon="⚡", layout="wide")
 
 st.markdown("""
@@ -22,8 +22,9 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; }
     .stButton>button {
         width: 100%; border-radius: 10px; background: linear-gradient(45deg, #00ffaa, #00d2ff);
-        color: #000; font-weight: bold; border: none;
+        color: #000; font-weight: bold; border: none; height: 45px;
     }
+    .tool-box { border: 1px solid #00ffaa; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -51,78 +52,67 @@ def salvar_mensagens(id_chat, mensagens):
 if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
 if "historico" not in st.session_state: st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
 
-# 5. BARRA LATERAL (HISTÓRICO E ARQUIVOS)
+# 5. BARRA LATERAL (CENTRAL DE FERRAMENTAS)
 with st.sidebar:
-    st.title("⚡ SUPERGROQ OMNI")
+    st.title("⚡ OMNI HUB 2026")
     
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_id = str(uuid.uuid4())
         st.session_state.historico = []
         st.rerun()
+
+    st.divider()
+    st.subheader("🛠️ FERRAMENTAS")
+    
+    ferramenta = st.radio("ATIVAR FERRAMENTA:", [
+        "🎨 Gerador de Imagens AI",
+        "🎮 Criador de Scripts Roblox",
+        "📚 Tutor Escolar Pro",
+        "🎬 Editor de Vídeo & YouTube",
+        "💼 Assistente de Trabalho",
+        "🏙️ Guia de Carazinho/Clima"
+    ])
+
+    st.divider()
+    st.subheader("📁 ANALISAR MÍDIA")
+    arquivo_up = st.file_uploader("Mande imagem/vídeo para a IA ver:", type=['png', 'jpg', 'jpeg', 'mp4'])
     
     st.divider()
-    st.subheader("📁 ENVIAR MÍDIA")
-    arquivo_up = st.file_uploader("Analise fotos/vídeos:", type=['png', 'jpg', 'jpeg', 'mp4'])
-    
-    st.divider()
-    st.subheader("💬 CONVERSAS")
+    st.subheader("💬 HISTÓRICO DE CHATS")
     arquivos = sorted(os.listdir(PASTA_CHATS), reverse=True)
-    for arq in arquivos[:10]:
+    for arq in arquivos[:15]:
         cid = arq.replace(".json", "")
         msgs = carregar_mensagens(cid)
         if msgs:
-            titulo = msgs[0]["content"][:20] + "..."
+            titulo = msgs[0]["content"][:20]
             if st.button(f"💬 {titulo}", key=cid):
                 st.session_state.chat_id = cid
                 st.session_state.historico = msgs
                 st.rerun()
 
 # 6. INTERFACE PRINCIPAL
-st.title("✨ SuperGroq 2.0")
-st.write(f"📅 {AGORA} | 📍 Carazinho - RS")
-
-modo = st.selectbox("🎯 MODO ATIVO:", ["Criador de Jogos", "Escolar", "YouTuber", "Editor de Vídeo", "Gerador de Imagens"])
+st.title(f"✨ SuperGroq - {ferramenta}")
+st.write(f"📅 {AGORA} | 🌡️ Carazinho - RS")
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
-        if "pollinations.ai" in msg["content"]:
-            st.image(msg["content"].split(" ")[-1])
+        if "https://pollinations.ai/p/" in msg["content"]:
+            url = msg["content"].split(" ")[-1]
+            st.image(url)
 
-# 7. LÓGICA DE INTELIGÊNCIA E CRIAÇÃO
-prompt = st.chat_input("Peça um script, uma imagem ou ajuda com a escola...")
+# 7. LÓGICA DE EXECUÇÃO
+prompt = st.chat_input(f"Comande a IA no modo {ferramenta}...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Coloque a chave na linha 54!")
+        st.error("🚨 Coloque a chave GSK da Groq na linha 58!")
         st.stop()
 
-    # Se for pedido de imagem
-    if "crie uma imagem" in prompt.lower() or "gere uma imagem" in prompt.lower():
-        prompt_imagem = prompt.lower().replace("crie uma imagem", "").replace("gere uma imagem", "").strip()
-        url_imagem = f"https://pollinations.ai/p/{prompt_imagem.replace(' ', '_')}?width=1024&height=1024&seed=42"
-        resposta_final = f"Aqui está sua imagem: {url_imagem}"
-    else:
-        # Chat normal com Groq
-        st.session_state.historico.append({"role": "user", "content": prompt})
-        try:
-            client = Groq(api_key=GROQ_API_KEY.strip())
-            instrucao = f"Você é a SuperGroq. Gentil, engraçada e a mais inteligente do mundo. Modo: {modo}. Hoje é {AGORA} em Carazinho."
-            
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": instrucao}] + st.session_state.historico,
-                model="llama-3.3-70b-versatile",
-            )
-            resposta_final = res.choices[0].message.content
-        except Exception as e:
-            resposta_final = f"Erro: {e}"
-
-    # Mostrar e Salvar
-    with st.chat_message("user"): st.write(prompt)
-    with st.chat_message("assistant"):
-        st.write(resposta_final)
-        if "pollinations.ai" in resposta_final:
-            st.image(resposta_final.split(" ")[-1])
-            
-    st.session_state.historico.append({"role": "assistant", "content": resposta_final})
-    salvar_mensagens(st.session_state.chat_id, st.session_state.historico)
+    with st.chat_message("user"):
+        st.write(prompt)
+    
+    # FERRAMENTA: GERADOR DE IMAGENS
+    if "Gerador de Imagens" in ferramenta:
+        url_imagem = f"https://pollinations.ai/p/{prompt.replace(' ', '_')}?width=1024&height=1024&seed={uuid.uuid4().int}"
+        resposta_final = f"🎨
