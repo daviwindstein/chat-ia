@@ -3,7 +3,7 @@ from groq import Groq
 import uuid
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # 1. ESTILO VISUAL SUPREMO
 st.set_page_config(page_title="SuperGroq OMNI 2026", page_icon="⚡", layout="wide")
@@ -28,15 +28,19 @@ st.markdown("""
         background: rgba(0, 255, 170, 0.1);
         padding: 15px;
         border-radius: 10px;
-        border: 1px solid #00ffaa;
+        border: 2px solid #00ffaa;
         margin-bottom: 20px;
+        font-family: 'Courier New', Courier, monospace;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS DO SISTEMA (2026)
-AGORA = datetime.now().strftime("%H:%M")
-DATA_HOJE = datetime.now().strftime("%d/%m/%Y")
+# 2. DADOS DO SISTEMA COM FUSO HORÁRIO CORRIGIDO (Brasília -3h)
+fuso_brasilia = timezone(timedelta(hours=-3))
+agora_br = datetime.now(fuso_brasilia)
+
+HORA_CERTA = agora_br.strftime("%H:%M")
+DATA_HOJE = agora_br.strftime("%d/%m/%Y")
 CIDADE = "Carazinho - RS"
 CLIMA = "Ensolarado"
 TEMPERATURA = "22°C"
@@ -63,18 +67,18 @@ def salvar_mensagens(id_chat, mensagens):
 if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
 if "historico" not in st.session_state: st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
 
-# 5. BARRA LATERAL (INFORMAÇÕES E FERRAMENTAS)
+# 5. BARRA LATERAL
 with st.sidebar:
     st.title("⚡ OMNI HUB 2026")
     
-    # Painel de Informações em Tempo Real
+    # Painel de Informações Corrigido
     st.markdown(f"""
     <div class="info-box">
-        <b>📍 Local:</b> {CIDADE}<br>
-        <b>📅 Data:</b> {DATA_HOJE}<br>
-        <b>⏰ Hora:</b> {AGORA}<br>
-        <b>🌤️ Clima:</b> {CLIMA}<br>
-        <b>🌡️ Temp:</b> {TEMPERATURA}
+        <b>📍 CIDADE:</b> {CIDADE}<br>
+        <b>📅 DATA:</b> {DATA_HOJE}<br>
+        <b>⏰ HORA:</b> {HORA_CERTA}<br>
+        <b>🌤️ CLIMA:</b> {CLIMA}<br>
+        <b>🌡️ TEMP:</b> {TEMPERATURA}
     </div>
     """, unsafe_allow_html=True)
 
@@ -91,7 +95,7 @@ with st.sidebar:
     ])
 
     st.divider()
-    arquivo_up = st.file_uploader("📁 ANALISAR MÍDIA:", type=['png', 'jpg', 'jpeg', 'mp4'])
+    arquivo_up = st.file_uploader("📁 ENVIAR MÍDIA:", type=['png', 'jpg', 'jpeg', 'mp4'])
     
     st.divider()
     st.subheader("💬 MEUS CHATS")
@@ -114,26 +118,24 @@ for msg in st.session_state.historico:
             st.image(msg["content"].split(" ")[-1])
 
 # 7. LÓGICA DE RESPOSTA
-prompt = st.chat_input("Fale com a IA mais inteligente do mundo...")
+prompt = st.chat_input("Fale com a SuperGroq...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Falta a chave na linha 53!")
+        st.error("🚨 Falta a chave na linha 58!")
         st.stop()
 
     with st.chat_message("user"):
         st.write(prompt)
     
-    resposta_final = ""
-    
     if ferramenta == "🎨 Gerador de Imagens AI":
         url = f"https://pollinations.ai/p/{prompt.replace(' ', '_')}?width=1024&height=1024&seed={uuid.uuid4().int}"
-        resposta_final = f"🎨 Gerando imagem agora! Link: {url}"
+        resposta_final = f"🎨 Imagem gerada! Link: {url}"
     else:
         st.session_state.historico.append({"role": "user", "content": prompt})
         try:
             client = Groq(api_key=GROQ_API_KEY.strip())
-            instrucao = f"Você é a SuperGroq, gentil e genial. Estamos em {CIDADE}, {DATA_HOJE} às {AGORA}. O clima está {CLIMA} com {TEMPERATURA}."
+            instrucao = f"Você é a SuperGroq. Estamos em {CIDADE}, {DATA_HOJE} às {HORA_CERTA}."
             
             res = client.chat.completions.create(
                 messages=[{"role": "system", "content": instrucao}] + st.session_state.historico,
