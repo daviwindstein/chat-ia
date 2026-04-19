@@ -5,30 +5,24 @@ import json
 import os
 from datetime import datetime
 
-# 1. ESTILO VISUAL (Neon e Dark)
-st.set_page_config(page_title="SuperGroq OMNI PRO", page_icon="⚡", layout="wide")
+# 1. ESTILO VISUAL (Neon, Dark e Profissional)
+st.set_page_config(page_title="SuperGroq OMNI 2026", page_icon="⚡", layout="wide")
 
 st.markdown("""
     <style>
     .stApp { background-color: #050505; color: white; }
     .stChatMessage {
         background-color: #ffffff !important;
-        border-radius: 20px;
-        padding: 20px;
-        margin-bottom: 15px;
-        border: 3px solid #00ffaa;
+        border-radius: 20px; padding: 20px; margin-bottom: 15px;
+        border: 3px solid #00ffaa; box-shadow: 0px 4px 15px rgba(0, 255, 170, 0.3);
     }
     .stChatMessage p, .stChatMessage span {
         color: #000000 !important; font-weight: 700 !important; font-size: 18px !important;
     }
-    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; overflow-y: auto; }
+    [data-testid="stSidebar"] { background-color: #0a0a0f; border-right: 2px solid #00ffaa; }
     .stButton>button {
         width: 100%; border-radius: 10px; background: linear-gradient(45deg, #00ffaa, #00d2ff);
-        color: #000; font-weight: bold; border: none; margin-bottom: 5px;
-    }
-    .chat-link {
-        padding: 10px; border-radius: 5px; background: #1a1a1a; margin-bottom: 5px;
-        cursor: pointer; border: 1px solid #333; text-align: left; color: #ccc;
+        color: #000; font-weight: bold; border: none;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -46,8 +40,7 @@ GROQ_API_KEY = "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"
 def carregar_mensagens(id_chat):
     caminho = f"{PASTA_CHATS}/{id_chat}.json"
     if os.path.exists(caminho):
-        with open(caminho, "r", encoding="utf-8") as f:
-            return json.load(f)
+        with open(caminho, "r", encoding="utf-8") as f: return json.load(f)
     return []
 
 def salvar_mensagens(id_chat, mensagens):
@@ -55,81 +48,81 @@ def salvar_mensagens(id_chat, mensagens):
         json.dump(mensagens, f, ensure_ascii=False, indent=4)
 
 # 4. GERENCIAMENTO DE ESTADO
-if "chat_id" not in st.session_state:
-    st.session_state.chat_id = str(uuid.uuid4())
-if "historico" not in st.session_state:
-    st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
+if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
+if "historico" not in st.session_state: st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
 
-# 5. BARRA LATERAL (IGUAL AO GEMINI)
+# 5. BARRA LATERAL (HISTÓRICO E ARQUIVOS)
 with st.sidebar:
-    st.title("⚡ SUPERGROQ")
+    st.title("⚡ SUPERGROQ OMNI")
     
-    # Botão de Novo Chat
-    if st.button("➕ NOVO CHAT", use_container_width=True):
+    if st.button("➕ NOVO CHAT"):
         st.session_state.chat_id = str(uuid.uuid4())
         st.session_state.historico = []
         st.rerun()
     
     st.divider()
-    st.subheader("💬 Conversas Recentes")
+    st.subheader("📁 ENVIAR MÍDIA")
+    arquivo_up = st.file_uploader("Analise fotos/vídeos:", type=['png', 'jpg', 'jpeg', 'mp4'])
     
-    # Listar chats salvos
-    arquivos = sorted(os.listdir(PASTA_CHATS), key=lambda x: os.path.getmtime(os.path.join(PASTA_CHATS, x)), reverse=True)
-    
-    for arq in arquivos:
+    st.divider()
+    st.subheader("💬 CONVERSAS")
+    arquivos = sorted(os.listdir(PASTA_CHATS), reverse=True)
+    for arq in arquivos[:10]:
         cid = arq.replace(".json", "")
         msgs = carregar_mensagens(cid)
         if msgs:
-            # Pega o começo da primeira mensagem do usuário como título
             titulo = msgs[0]["content"][:20] + "..."
-            if st.button(f"📄 {titulo}", key=cid):
+            if st.button(f"💬 {titulo}", key=cid):
                 st.session_state.chat_id = cid
                 st.session_state.historico = msgs
                 st.rerun()
 
-# 6. INTERFACE DE CHAT
-st.title("✨ SuperGroq OMNI PRO")
+# 6. INTERFACE PRINCIPAL
+st.title("✨ SuperGroq 2.0")
 st.write(f"📅 {AGORA} | 📍 Carazinho - RS")
 
-# Seletor de Modo
-modo = st.selectbox("🎯 Modo:", ["Criador de Jogos", "Escolar", "YouTuber", "Editor", "Dicas"])
+modo = st.selectbox("🎯 MODO ATIVO:", ["Criador de Jogos", "Escolar", "YouTuber", "Editor de Vídeo", "Gerador de Imagens"])
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
+        if "pollinations.ai" in msg["content"]:
+            st.image(msg["content"].split(" ")[-1])
 
-# 7. LÓGICA DE INTELIGÊNCIA
-prompt = st.chat_input("Diga algo para a SuperGroq...")
+# 7. LÓGICA DE INTELIGÊNCIA E CRIAÇÃO
+prompt = st.chat_input("Peça um script, uma imagem ou ajuda com a escola...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Coloque a chave na linha 48!")
+        st.error("🚨 Coloque a chave na linha 54!")
         st.stop()
 
-    # Adiciona mensagem do usuário
-    st.session_state.historico.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
+    # Se for pedido de imagem
+    if "crie uma imagem" in prompt.lower() or "gere uma imagem" in prompt.lower():
+        prompt_imagem = prompt.lower().replace("crie uma imagem", "").replace("gere uma imagem", "").strip()
+        url_imagem = f"https://pollinations.ai/p/{prompt_imagem.replace(' ', '_')}?width=1024&height=1024&seed=42"
+        resposta_final = f"Aqui está sua imagem: {url_imagem}"
+    else:
+        # Chat normal com Groq
+        st.session_state.historico.append({"role": "user", "content": prompt})
+        try:
+            client = Groq(api_key=GROQ_API_KEY.strip())
+            instrucao = f"Você é a SuperGroq. Gentil, engraçada e a mais inteligente do mundo. Modo: {modo}. Hoje é {AGORA} em Carazinho."
+            
+            res = client.chat.completions.create(
+                messages=[{"role": "system", "content": instrucao}] + st.session_state.historico,
+                model="llama-3.3-70b-versatile",
+            )
+            resposta_final = res.choices[0].message.content
+        except Exception as e:
+            resposta_final = f"Erro: {e}"
 
+    # Mostrar e Salvar
+    with st.chat_message("user"): st.write(prompt)
     with st.chat_message("assistant"):
-        with st.spinner("🧠 Pensando..."):
-            try:
-                client = Groq(api_key=GROQ_API_KEY.strip())
-                instrucao = f"Você é a SuperGroq, gentil, engraçada e mestre em tudo. Modo: {modo}. Hoje é {AGORA} em Carazinho."
-                
-                mensagens_com_sistema = [{"role": "system", "content": instrucao}] + st.session_state.historico
-                
-                res = client.chat.completions.create(
-                    messages=mensagens_com_sistema,
-                    model="llama-3.3-70b-versatile",
-                    temperature=0.7,
-                )
-
-                resposta = res.choices[0].message.content
-                st.write(resposta)
-                st.session_state.historico.append({"role": "assistant", "content": resposta})
-                
-                # Salva no arquivo
-                salvar_mensagens(st.session_state.chat_id, st.session_state.historico)
-            except Exception as e:
-                st.error(f"Erro: {e}")
+        st.write(resposta_final)
+        if "pollinations.ai" in resposta_final:
+            st.image(resposta_final.split(" ")[-1])
+            
+    st.session_state.historico.append({"role": "assistant", "content": resposta_final})
+    salvar_mensagens(st.session_state.chat_id, st.session_state.historico)
