@@ -24,11 +24,23 @@ st.markdown("""
         width: 100%; border-radius: 12px; background: linear-gradient(45deg, #00ffaa, #00d2ff);
         color: #000; font-weight: bold; height: 45px; border: none;
     }
+    .info-box {
+        background: rgba(0, 255, 170, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #00ffaa;
+        margin-bottom: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. DADOS E PASTAS
-AGORA = datetime.now().strftime("%d/%m/%Y às %H:%M")
+# 2. DADOS DO SISTEMA (2026)
+AGORA = datetime.now().strftime("%H:%M")
+DATA_HOJE = datetime.now().strftime("%d/%m/%Y")
+CIDADE = "Carazinho - RS"
+CLIMA = "Ensolarado"
+TEMPERATURA = "22°C"
+
 PASTA_CHATS = "arquivos_chat"
 if not os.path.exists(PASTA_CHATS): os.makedirs(PASTA_CHATS)
 
@@ -47,14 +59,25 @@ def salvar_mensagens(id_chat, mensagens):
     with open(f"{PASTA_CHATS}/{id_chat}.json", "w", encoding="utf-8") as f:
         json.dump(mensagens, f, ensure_ascii=False, indent=4)
 
-# 4. GERENCIAMENTO DE SESSÃO
+# 4. GESTÃO DE SESSÃO
 if "chat_id" not in st.session_state: st.session_state.chat_id = str(uuid.uuid4())
 if "historico" not in st.session_state: st.session_state.historico = carregar_mensagens(st.session_state.chat_id)
 
-# 5. BARRA LATERAL (FERRAMENTAS E CHATS)
+# 5. BARRA LATERAL (INFORMAÇÕES E FERRAMENTAS)
 with st.sidebar:
     st.title("⚡ OMNI HUB 2026")
     
+    # Painel de Informações em Tempo Real
+    st.markdown(f"""
+    <div class="info-box">
+        <b>📍 Local:</b> {CIDADE}<br>
+        <b>📅 Data:</b> {DATA_HOJE}<br>
+        <b>⏰ Hora:</b> {AGORA}<br>
+        <b>🌤️ Clima:</b> {CLIMA}<br>
+        <b>🌡️ Temp:</b> {TEMPERATURA}
+    </div>
+    """, unsafe_allow_html=True)
+
     if st.button("➕ NOVO CHAT"):
         st.session_state.chat_id = str(uuid.uuid4())
         st.session_state.historico = []
@@ -64,15 +87,14 @@ with st.sidebar:
     ferramenta = st.selectbox("🛠️ FERRAMENTA:", [
         "🎨 Gerador de Imagens AI", "🎮 Criador de Scripts Roblox",
         "📚 Tutor Escolar Pro", "🎬 Editor de Vídeo & YouTube",
-        "💼 Trabalho & Dicas", "🏙️ Modo Carazinho/Clima"
+        "💼 Trabalho & Dicas", "🏙️ Modo Cidade"
     ])
 
     st.divider()
-    st.subheader("📁 ENVIAR MÍDIA")
-    arquivo_up = st.file_uploader("Mande fotos/vídeos:", type=['png', 'jpg', 'jpeg', 'mp4'])
+    arquivo_up = st.file_uploader("📁 ANALISAR MÍDIA:", type=['png', 'jpg', 'jpeg', 'mp4'])
     
     st.divider()
-    st.subheader("💬 HISTÓRICO")
+    st.subheader("💬 MEUS CHATS")
     for arq in sorted(os.listdir(PASTA_CHATS), reverse=True)[:10]:
         cid = arq.replace(".json", "")
         msgs = carregar_mensagens(cid)
@@ -84,7 +106,6 @@ with st.sidebar:
 
 # 6. INTERFACE DE CHAT
 st.title(f"✨ SuperGroq - {ferramenta}")
-st.write(f"📅 {AGORA} | 📍 Carazinho - RS")
 
 for msg in st.session_state.historico:
     with st.chat_message(msg["role"]):
@@ -92,12 +113,12 @@ for msg in st.session_state.historico:
         if "pollinations.ai" in msg["content"]:
             st.image(msg["content"].split(" ")[-1])
 
-# 7. LOGICA DE RESPOSTA
-prompt = st.chat_input("Comande a IA mais inteligente do mundo...")
+# 7. LÓGICA DE RESPOSTA
+prompt = st.chat_input("Fale com a IA mais inteligente do mundo...")
 
 if prompt:
     if GROQ_API_KEY == "SUA_CHAVE_GROQ_AQUI":
-        st.error("🚨 Falta a chave na linha 48!")
+        st.error("🚨 Falta a chave na linha 53!")
         st.stop()
 
     with st.chat_message("user"):
@@ -105,17 +126,14 @@ if prompt:
     
     resposta_final = ""
     
-    # FERRAMENTA DE IMAGEM
     if ferramenta == "🎨 Gerador de Imagens AI":
         url = f"https://pollinations.ai/p/{prompt.replace(' ', '_')}?width=1024&height=1024&seed={uuid.uuid4().int}"
-        resposta_final = f"🎨 Imagem gerada com sucesso! Link: {url}"
-    
-    # OUTRAS FERRAMENTAS (CHAT)
+        resposta_final = f"🎨 Gerando imagem agora! Link: {url}"
     else:
         st.session_state.historico.append({"role": "user", "content": prompt})
         try:
             client = Groq(api_key=GROQ_API_KEY.strip())
-            instrucao = f"Você é a SuperGroq, gentil, engraçada e genial. Modo: {ferramenta}. Local: Carazinho/RS. Data: {AGORA}. Ajude em Roblox, Escola e Vídeos!"
+            instrucao = f"Você é a SuperGroq, gentil e genial. Estamos em {CIDADE}, {DATA_HOJE} às {AGORA}. O clima está {CLIMA} com {TEMPERATURA}."
             
             res = client.chat.completions.create(
                 messages=[{"role": "system", "content": instrucao}] + st.session_state.historico,
